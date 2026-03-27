@@ -1,0 +1,81 @@
+version: '3.9'
+
+services:
+  # ── PostgreSQL ─────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       beastvault
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: beastpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # ── Redis ──────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  # ── MinIO (local S3-compatible storage for dev) ────────────────────
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER:     minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"    # MinIO Console UI
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  # ── API Server ─────────────────────────────────────────────────────
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file: .env
+    environment:
+      DB_HOST:    postgres
+      REDIS_HOST: redis
+      S3_ENDPOINT: http://minio:9000
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    # --- ADDED VOLUMES BELOW ---
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm start
+
+  # ── Video Worker ───────────────────────────────────────────────────
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST:    postgres
+      REDIS_HOST: redis
+      S3_ENDPOINT: http://minio:9000
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    # --- ADDED VOLUMES BELOW ---
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run worker
+
+volumes:
+  pg_data:
+  minio_data:

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BeastVault // Advanced Video Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<style>
+  :root { 
+    --accent: #10b981; 
+    --bg: #050505; 
+    --sidebar: #0a0a0a; 
+    --text: #fdfdfd; 
+    --text-muted: #888; 
+    --border: #1f1f1f;
+    --card: #121212;
+    --nav-bg: rgba(5,5,5,0.8);
+  }
+
+  [data-theme="light"] {
+    --bg: #f9fafb;
+    --sidebar: #ffffff;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --card: #ffffff;
+    --nav-bg: rgba(249,250,251,0.8);
+  }
+
+  * { box-sizing: border-box; transition: background 0.3s, color 0.3s, border-color 0.3s; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+
+  /* --- HEADER --- */
+  nav { height: 60px; background: var(--nav-bg); backdrop-filter: blur(15px); display: flex; align-items: center; padding: 0 24px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); justify-content: space-between; }
+  .logo { font-family: 'JetBrains Mono'; font-weight: 800; font-size: 20px; cursor: pointer; letter-spacing: -1px; }
+  .logo span { color: var(--accent); }
+
+  .search-wrap { flex: 0 1 500px; display: flex; align-items: center; }
+  .search-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 40px; padding: 8px 20px; color: var(--text); outline: none; }
+  .search-input:focus { border-color: var(--accent); }
+
+  .nav-right { display: flex; gap: 12px; align-items: center; }
+  .btn-primary { background: var(--accent); color: #000; border: none; padding: 8px 18px; border-radius: 40px; font-weight: 700; cursor: pointer; font-size: 14px; }
+  .btn-theme { background: var(--border); color: var(--text); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  
+  /* --- LAYOUT --- */
+  .layout { display: flex; padding-top: 60px; }
+  aside { width: 240px; background: var(--sidebar); height: 100vh; position: fixed; padding: 15px; border-right: 1px solid var(--border); }
+  .nav-item { padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-muted); display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+  .nav-item:hover, .nav-item.active { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+
+  main { margin-left: 240px; flex: 1; padding: 30px; }
+
+  /* --- PAGES --- */
+  .page { display: none; }
+  .page-active { display: block; }
+
+  /* --- VIDEO GRID --- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .card { cursor: pointer; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; padding-bottom: 12px; }
+  .card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+  .thumb { aspect-ratio: 16/9; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .badge { position: absolute; top: 8px; left: 8px; background: #000; border: 1px solid var(--accent); color: var(--accent); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+
+  .card-body { padding: 12px; }
+  .v-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; line-height: 1.4; }
+  .v-meta { color: var(--text-muted); font-size: 13px; }
+
+  /* --- PLAYER --- */
+  .player-box { width: 100%; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid var(--border); }
+  .player-box video { width: 100%; display: block; aspect-ratio: 16/9; }
+  .player-header { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 24px; }
+  .btn-purge { background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 700; }
+</style>
+</head>
+<body data-theme="dark">
+
+<nav>
+  <div class="logo" onclick="showPage('home')">BEAST<span>VAULT</span></div>
+  <div class="search-wrap">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search the vault...">
+  </div>
+  <div class="nav-right">
+    <button class="btn-theme" id="themeToggle" onclick="toggleTheme()">🌓</button>
+    <button class="btn-primary" onclick="showPage('upload')">+ UNLEASH</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside>
+    <div class="nav-item active" id="btn-home" onclick="showPage('home')">🏠 Home</div>
+    <div class="nav-item">🔥 Trending</div>
+    <div style="height:1px; background:var(--border); margin:20px 0;"></div>
+    <div style="font-size:11px; font-weight:800; color:var(--text-muted); padding:0 15px 10px; letter-spacing: 1px;">CATEGORIES</div>
+    <div class="nav-item" onclick="filterByCat('Material Science')">🔬 Material Science</div>
+    <div class="nav-item" onclick="filterByCat('Python Development')">🐍 Python Mastery</div>
+    <div class="nav-item" onclick="filterByCat('Miyamoto Musashi')">⚔️ Musashi Zen</div>
+    <div class="nav-item" onclick="filterByCat('CUET Preparation')">📝 CUET / Board Prep</div>
+  </aside>
+
+  <main>
+    <div id="page-home" class="page page-active">
+      <h1 style="font-size: 36px; letter-spacing: -1.5px; margin-bottom: 30px;">The <span style="color:var(--accent)">Vault</span></h1>
+      <div class="grid" id="mainGrid"></div>
+    </div>
+
+    <div id="page-player" class="page">
+      <div class="player-box">
+        <video id="playerVideo" controls></video>
+      </div>
+      <div class="player-header">
+        <div>
+          <h1 id="vTitle" style="margin:0; font-size:28px;">Video Title</h1>
+          <p id="vMeta" class="v-meta" style="color: var(--accent); font-weight: 600;">0 views</p>
+        </div>
+        <button class="btn-purge" id="purgeBtn">Purge Video</button>
+      </div>
+      <div style="margin-top:24px; padding:24px; background:var(--card); border-radius:12px; border:1px solid var(--border);" id="vDesc"></div>
+    </div>
+
+    <div id="page-upload" class="page">
+      <h1 style="font-size: 36px; letter-spacing: -1.5px; margin-bottom: 30px;">Unleash <span style="color:var(--accent)">Content</span></h1>
+      <div class="upload-card">
+        <div class="form-group"><label>Video File</label><input type="file" id="fileInput" accept="video/*"></div>
+        <div class="form-group"><label>Beast Name</label><input type="text" id="upTitle" placeholder="Video Title"></div>
+        <div class="form-group"><label>Description</label><textarea id="upDesc" rows="4" placeholder="Description"></textarea></div>
+        <div class="form-group"><label>Category</label><select id="upCat">
+            <option>General</option>
+            <option>Material Science</option>
+            <option>Python Development</option>
+            <option>Miyamoto Musashi</option>
+            <option>CUET Preparation</option>
+        </select></div>
+        <button class="btn-primary" style="width:100%; padding:16px; font-size:16px;" id="publishBtn" onclick="publishVideo()">Publish to Vault</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_URL = 'http://localhost:4000/api';
+let allVideos = [];
+let hlsInstance = null;
+
+// --- THEME ---
+function toggleTheme() {
+  const body = document.body;
+  const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('beast-theme', newTheme);
+}
+document.body.setAttribute('data-theme', localStorage.getItem('beast-theme') || 'dark');
+
+// --- NAVIGATION ---
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('page-active'));
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById(`page-${pageId}`).classList.add('page-active');
+  if(pageId === 'home') { document.getElementById('btn-home').classList.add('active'); fetchVideos(); }
+  if(pageId !== 'player' && hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+}
+
+// --- API ---
+async function fetchVideos() {
+  try {
+    const res = await fetch(`${API_URL}/videos`);
+    const data = await res.json();
+    allVideos = data.videos || [];
+    renderGrid(allVideos);
+  } catch(e) { console.error("Offline"); }
+}
+
+function renderGrid(vids) {
+  const grid = document.getElementById('mainGrid');
+  grid.innerHTML = vids.map(v => `
+    <div class="card" onclick="openPlayer('${v.id}')">
+      <div class="thumb">
+        <div class="badge">${v.status.toUpperCase()}</div>
+        ${v.thumbnail_url ? `<img src="${v.thumbnail_url}">` : '🎬'}
+      </div>
+      <div class="card-body">
+        <div class="v-title">${v.title.toUpperCase()}</div>
+        <div class="v-meta">${v.views || 0} views • ${v.uploader || 'Anonymous'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- VIEW COUNTER LOGIC ---
+async function recordView(id) {
+  try {
+    // Calls the existing POST /api/videos/:id/view route in your backend
+    await fetch(`${API_URL}/videos/${id}/view`, { method: 'POST' });
+  } catch(e) { console.error("Could not record view"); }
+}
+
+async function openPlayer(id) {
+  const v = allVideos.find(vid => vid.id === id);
+  if (!v) return;
+
+  showPage('player');
+  
+  // 1. Record the view immediately on open
+  recordView(id);
+
+  document.getElementById('vTitle').innerText = v.title;
+  document.getElementById('vDesc').innerText = v.description || "No context provided.";
+  // 2. Increment view count locally for the current session display
+  document.getElementById('vMeta').innerText = `${(v.views || 0) + 1} views • ${v.uploader || 'Anonymous'}`;
+  document.getElementById('purgeBtn').onclick = () => deleteVideo(v.id);
+
+  const video = document.getElementById('playerVideo');
+  if (Hls.isSupported() && v.hls_url) {
+    hlsInstance = new Hls();
+    hlsInstance.loadSource(v.hls_url);
+    hlsInstance.attachMedia(video);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+  } else if (v.hls_url) {
+    video.src = v.hls_url;
+    video.play();
+  }
+}
+
+async function publishVideo() {
+  const file = document.getElementById('fileInput').files[0];
+  const title = document.getElementById('upTitle').value;
+  if (!file || !title) return alert("Missing Title or File");
+  const btn = document.getElementById('publishBtn');
+  btn.innerText = "UNLEASHING..."; btn.disabled = true;
+  const fd = new FormData();
+  fd.append('video', file); fd.append('title', title);
+  fd.append('description', document.getElementById('upDesc').value);
+  fd.append('category', document.getElementById('upCat').value);
+  try {
+    const res = await fetch(`${API_URL}/videos/upload`, { method: 'POST', body: fd });
+    if (res.ok) { alert("Unleashed!"); showPage('home'); }
+  } catch(e) { alert("Failed"); }
+  finally { btn.innerText = "Publish to Vault"; btn.disabled = false; }
+}
+
+async function deleteVideo(id) {
+  if(!confirm("Purge?")) return;
+  const res = await fetch(`${API_URL}/videos/${id}`, { method: 'DELETE' });
+  if(res.ok) showPage('home');
+}
+
+function filterByCat(cat) {
+  const filtered = allVideos.filter(v => v.category === cat);
+  renderGrid(filtered);
+}
+
+document.getElementById('searchInput').oninput = (e) => {
+  const q = e.target.value.toLowerCase();
+  renderGrid(allVideos.filter(v => v.title.toLowerCase().includes(q)));
+};
+
+fetchVideos();
+</script>
+</body>
+</html>
