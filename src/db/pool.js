@@ -1,11 +1,25 @@
 const { Pool } = require('pg');
 
+// Check if we are running in the cloud (Render) or locally
+const isProduction = process.env.DATABASE_URL;
+
+const poolConfig = isProduction 
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false, // Required for Neon cloud hosting
+      },
+    }
+  : {
+      host:     process.env.DB_HOST,
+      port:     parseInt(process.env.DB_PORT || '5432'),
+      database: process.env.DB_NAME,
+      user:     process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+    };
+
 const pool = new Pool({
-  host:     process.env.DB_HOST,
-  port:     parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME,
-  user:     process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  ...poolConfig,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
