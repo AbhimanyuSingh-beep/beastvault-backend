@@ -12,17 +12,20 @@ const videoRoutes = require('./routes/videos');
 const userRoutes  = require('./routes/users');
 
 const app  = express();
+
+// ── Render/Proxy Configuration ──────────────────────────────────────
+// This line is required for the rate limiter to work correctly on Render
+app.set('trust proxy', 1); 
+
 const PORT = parseInt(process.env.PORT || '4000');
 
 // ── Security headers ─────────────────────────────────────────────────
-// Updated Helmet to allow cross-origin resources (videos/images)
 app.use(helmet({
   crossOriginResourcePolicy: false,
   contentSecurityPolicy: false,
 }));
 
 // ── CORS ─────────────────────────────────────────────────────────────
-// UNLOCKED: Allowing all origins so your local .html file can connect
 app.use(cors({
   origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -42,7 +45,7 @@ if (process.env.NODE_ENV !== 'test') {
 // ── Global rate limiters ─────────────────────────────────────────────
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000, // Increased for testing
+  max: 1000, 
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests — slow down, beast!' },
