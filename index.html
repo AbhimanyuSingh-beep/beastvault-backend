@@ -218,18 +218,18 @@ async function openPlayer(id) {
   document.getElementById('vMeta').innerText = `${(v.views || 0) + 1} views • ${v.uploader || 'Anonymous'}`;
   document.getElementById('purgeBtn').onclick = () => deleteVideo(v.id);
 
-  const video = document.getElementById('playerVideo');
-  if (Hls.isSupported() && v.hls_url) {
-    hlsInstance = new Hls();
-    hlsInstance.loadSource(v.hls_url);
-    hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-  } else if (v.hls_url) {
-    video.src = v.hls_url;
-    video.play();
-  }
+const video = document.getElementById('playerVideo');
+if (v.hls_url) {
+    if (v.hls_url.includes('.m3u8') && Hls.isSupported()) {
+        hlsInstance = new Hls();
+        hlsInstance.loadSource(v.hls_url);
+        hlsInstance.attachMedia(video);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+    } else {
+        video.src = v.hls_url;
+        video.play();
+    }
 }
-
 async function publishVideo() {
   const file = document.getElementById('fileInput').files[0];
   const title = document.getElementById('upTitle').value;
