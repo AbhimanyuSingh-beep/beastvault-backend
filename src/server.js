@@ -7,15 +7,16 @@ const morgan     = require('morgan');
 const compression = require('compression');
 const rateLimit  = require('express-rate-limit');
 
-const authRoutes  = require('./routes/auth');
-const videoRoutes = require('./routes/videos');
-const userRoutes  = require('./routes/users');
+const authRoutes    = require('./routes/auth');
+const videoRoutes   = require('./routes/videos');
+const userRoutes    = require('./routes/users');
+const youtubeRoutes = require('./routes/youtube');
 
 const app  = express();
 
 // ── 1. GLOBAL CORS (MUST BE FIRST) ──────────────────────────────────
 app.use(cors({
-  origin: '*', // Allows your GitHub site to talk to your local computer
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Bypass-Tunnel-Reminder'],
   exposedHeaders: ['Bypass-Tunnel-Reminder']
@@ -41,10 +42,10 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// ── 6. Global rate limiters (Moved down) ─────────────────────────────
+// ── 6. Global rate limiters ──────────────────────────────────────────
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 2000, // Increased for testing
+  max: 2000,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -52,9 +53,10 @@ app.use('/api/', generalLimiter);
 
 // ── 7. API Routes ────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', mode: 'UNLEASHED' }));
-app.use('/api/auth',   authRoutes);
-app.use('/api/videos', videoRoutes);
-app.use('/api/users',  userRoutes);
+app.use('/api/auth',    authRoutes);
+app.use('/api/videos',  videoRoutes);
+app.use('/api/users',   userRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
