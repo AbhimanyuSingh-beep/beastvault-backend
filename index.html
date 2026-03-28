@@ -179,7 +179,7 @@ input, textarea, select { font-family: inherit; }
   border-radius: var(--r-lg); overflow: hidden; cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, border-color 0.25s;
 }
-.vcard:hover { transform: translateY(-6px); border-color: rgba(59,130,246,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(225,29,72,0.2), var(--glow); }
+.vcard:hover { transform: translateY(-6px); border-color: rgba(225,29,72,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(225,29,72,0.2), var(--glow); }
 .vcard-thumb { position: relative; aspect-ratio: 16/9; background: var(--bg4); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; }
 .vcard-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
 .vcard:hover .vcard-thumb img { transform: scale(1.06); }
@@ -228,14 +228,14 @@ input, textarea, select { font-family: inherit; }
 .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--p-light); box-shadow: 0 0 0 3px var(--p-dim); }
 .field-input::placeholder, .field-textarea::placeholder { color: var(--t3); }
 .field-textarea { resize: vertical; min-height: 88px; }
-.drop-zone { border: 2px dashed rgba(59,130,246,0.2); border-radius: var(--r-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: rgba(37,99,235,0.02); }
+.drop-zone { border: 2px dashed rgba(225,29,72,0.2); border-radius: var(--r-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: rgba(225,29,72,0.02); }
 .drop-zone:hover, .drop-zone.dragover { border-color: var(--p-light); background: var(--p-dim); }
 .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .drop-icon { font-size: 40px; margin-bottom: 12px; }
 .drop-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
 .drop-sub { font-size: 13px; color: var(--t3); }
 .drop-sub span { color: var(--p-glow); font-weight: 600; }
-.drop-file { display: none; margin-top: 12px; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--r-sm); padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
+.drop-file { display: none; margin-top: 12px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--r-sm); padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
 .btn-publish { width: 100%; padding: 16px; background: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #f59e0b 100%); border: none; border-radius: var(--r-md); color: #fff; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 24px rgba(225,29,72,0.45); }
 .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(225,29,72,0.55); }
 .btn-publish:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
@@ -393,7 +393,6 @@ input, textarea, select { font-family: inherit; }
 <div class="bg-mesh"></div>
 <div class="top-stripe"></div>
 
-<!-- TOP NAV -->
 <nav class="topnav">
   <div class="topnav-logo" onclick="showPage('home')">BEAST<span>▸</span>VAULT</div>
   <div class="topnav-search">
@@ -409,13 +408,18 @@ input, textarea, select { font-family: inherit; }
   </div>
 </nav>
 
-<!-- DESKTOP SIDEBAR -->
 <aside class="sidebar">
   <div class="sbar-item active" id="sbar-home" onclick="showPage('home')">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
     <span>Home</span>
+  </div>
+  <div class="sbar-item" id="sbar-yt-hub" onclick="showPage('yt-hub')">
+    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-10 12.5v-9l6 4.5-6 4.5z"/>
+    </svg>
+    <span>Explore</span>
   </div>
   <div class="sbar-item" onclick="showPage('upload')">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -450,7 +454,6 @@ input, textarea, select { font-family: inherit; }
 
 <main class="main">
 
-  <!-- HOME PAGE -->
   <div id="page-home" class="page active">
     <div class="home-wrap">
       <div class="cat-scroll" id="catPills">
@@ -475,7 +478,6 @@ input, textarea, select { font-family: inherit; }
     </div>
   </div>
 
-  <!-- PLAYER PAGE -->
   <div id="page-player" class="page">
     <div class="player-wrap">
       <div class="player-shell">
@@ -508,7 +510,6 @@ input, textarea, select { font-family: inherit; }
     </div>
   </div>
 
-  <!-- UPLOAD PAGE -->
   <div id="page-upload" class="page">
     <div class="upload-wrap">
       <div class="upload-hero">
@@ -564,7 +565,33 @@ input, textarea, select { font-family: inherit; }
     </div>
   </div>
 
-  <!-- YOUTUBE SHORTS PAGE -->
+  <div id="page-yt-hub" class="page">
+    <div class="yt-wrap">
+      <div class="yt-hero">
+        <h1>YouTube <em>Explorer</em></h1>
+        <p>Watch trending content or search the entire YouTube library directly from BeastVault.</p>
+      </div>
+      
+      <div class="topnav-search" style="max-width: 100%; margin-bottom: 24px; background: var(--bg4);">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input id="ytSearchInput" type="text" placeholder="Search YouTube videos..." onkeyup="if(event.key==='Enter') searchYouTube()">
+      </div>
+
+      <div class="section-head">
+        <div class="section-title" id="ytGridTitle">Trending on YouTube <span class="dot">•</span></div>
+      </div>
+      
+      <div class="vgrid" id="ytGrid">
+        <div class="empty">
+          <div class="empty-icon">⏳</div>
+          <div class="empty-text">Loading YouTube Data...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="page-youtube" class="page">
     <div class="yt-wrap">
       <div class="yt-hero">
@@ -572,7 +599,6 @@ input, textarea, select { font-family: inherit; }
         <p>Select a video from your vault and stream it directly to your YouTube channel.</p>
       </div>
 
-      <!-- Connect card -->
       <div class="yt-connect-card">
         <div class="yt-connect-left">
           <div class="yt-logo">▶</div>
@@ -591,12 +617,10 @@ input, textarea, select { font-family: inherit; }
       </div>
 
       <div class="yt-info-banner">
-        <strong>How it works:</strong> Click "Connect YouTube" → sign in with Google → come back here → pick a video from your vault → fill in title &amp; tags → hit Publish. Your video goes live as a YouTube Short instantly. Videos under 60 seconds in vertical format are automatically classified as Shorts by YouTube.
+        <strong>How it works:</strong> Click "Connect YouTube" → sign in with Google → come back here → pick a video from your vault → fill in title &amp; tags → hit Publish. Videos under 60 seconds in vertical format are automatically classified as Shorts by YouTube.
       </div>
 
-      <!-- Publish form -->
       <div class="yt-grid">
-
         <div class="yt-card full">
           <label class="field-label">Select video from vault</label>
           <div class="yt-video-picker">
@@ -638,21 +662,24 @@ input, textarea, select { font-family: inherit; }
         <div class="yt-card full" style="padding:0;background:transparent;border:none;">
           <button class="btn-yt-publish" id="ytPublishBtn" onclick="publishToYouTube()">▶ PUBLISH TO YOUTUBE SHORTS</button>
         </div>
-
       </div>
 
-      <!-- Result card -->
       <div class="yt-result-card" id="ytResultCard">
         <div class="yt-result-title">Uploaded to YouTube!</div>
         <div class="yt-result-link">Your Short is live at: <a id="ytResultLink" href="#" target="_blank">view on YouTube</a></div>
       </div>
-
     </div>
   </div>
 
 </main>
 
-<!-- MOBILE BOTTOM NAV -->
+<div id="ytModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+  <div style="width:100%; max-width:1000px; aspect-ratio:16/9; position:relative;">
+      <button onclick="closeYTPlayer()" style="position:absolute; top:-40px; right:0; background:none; border:none; color:white; font-size:24px; cursor:pointer; transition: color 0.2s;">✕</button>
+      <iframe id="ytFrame" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px; box-shadow: 0 0 50px rgba(255,0,0,0.25);"></iframe>
+  </div>
+</div>
+
 <nav class="mob-nav">
   <div class="mob-nav-inner">
     <button class="mob-nav-btn active" id="mob-home" onclick="showPage('home')">
@@ -661,11 +688,11 @@ input, textarea, select { font-family: inherit; }
       </svg>
       <span>Home</span>
     </button>
-    <button class="mob-nav-btn" onclick="showPage('home');setTimeout(()=>document.getElementById('searchInput').focus(),300)">
+    <button class="mob-nav-btn" onclick="showPage('yt-hub')">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-10 12.5v-9l6 4.5-6 4.5z"/>
       </svg>
-      <span>Search</span>
+      <span>Explore</span>
     </button>
     <button class="mob-nav-btn upload-btn" onclick="showPage('upload')">
       <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -737,10 +764,15 @@ function showPage(id) {
   document.getElementById('page-' + id).classList.add('active');
   document.querySelectorAll('.sbar-item').forEach(i => i.classList.remove('active'));
   document.querySelectorAll('.mob-nav-btn').forEach(i => i.classList.remove('active'));
+  
   if (id === 'home') {
     document.getElementById('sbar-home')?.classList.add('active');
     document.getElementById('mob-home')?.classList.add('active');
     fetchVideos();
+  }
+  if (id === 'yt-hub') {
+    document.getElementById('sbar-yt-hub')?.classList.add('active');
+    fetchYTTrending();
   }
   if (id === 'youtube') {
     document.getElementById('sbar-yt')?.classList.add('active');
@@ -755,7 +787,7 @@ function showPage(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ── Fetch Videos ── */
+/* ── Fetch Vault Videos ── */
 async function fetchVideos() {
   try {
     const r = await fetch(API + '/videos', { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
@@ -782,7 +814,7 @@ function updateStats() {
   if (el2) el2.textContent = views >= 1000 ? (views/1000).toFixed(1)+'k' : views;
 }
 
-/* ── Render Grid ── */
+/* ── Render Vault Grid ── */
 function renderGrid(vids) {
   const g = document.getElementById('mainGrid');
   const cnt = document.getElementById('videoCount');
@@ -815,7 +847,7 @@ function renderGrid(vids) {
   `).join('');
 }
 
-/* ── Filter ── */
+/* ── Filter & Search ── */
 function filterCat(cat, el) {
   document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -824,18 +856,16 @@ function filterCat(cat, el) {
   setTimeout(() => renderGrid(filtered), 50);
 }
 
-/* ── Search ── */
 document.getElementById('searchInput').oninput = e => {
   const q = e.target.value.toLowerCase();
   renderGrid(q ? allVideos.filter(v => v.title.toLowerCase().includes(q)) : allVideos);
 };
 
-/* ── Record View ── */
+/* ── Open Player & Delete ── */
 async function recView(id) {
   try { await fetch(API + '/videos/' + id + '/view', { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } }); } catch(e) {}
 }
 
-/* ── Open Player ── */
 async function openPlayer(id) {
   const v = allVideos.find(x => x.id === id);
   if (!v) return;
@@ -864,7 +894,15 @@ async function openPlayer(id) {
   }
 }
 
-/* ── File change ── */
+async function deleteVideo(id) {
+  if (!confirm('Purge this video permanently from the vault?')) return;
+  try {
+    const r = await fetch(API + '/videos/' + id, { method: 'DELETE', headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    if (r.ok) { showToast('🗑️ Video purged.'); showPage('home'); }
+  } catch(e) { showToast('❌ Delete failed'); }
+}
+
+/* ── Upload ── */
 function onFileChange(input) {
   const f = input.files[0];
   if (!f) return;
@@ -873,7 +911,6 @@ function onFileChange(input) {
   el.style.display = 'inline-block';
 }
 
-/* ── Publish to Vault ── */
 async function publishVideo() {
   const file = document.getElementById('fileInput').files[0];
   const title = document.getElementById('upTitle').value.trim();
@@ -908,16 +945,6 @@ async function publishVideo() {
   }
 }
 
-/* ── Delete ── */
-async function deleteVideo(id) {
-  if (!confirm('Purge this video permanently from the vault?')) return;
-  try {
-    const r = await fetch(API + '/videos/' + id, { method: 'DELETE', headers: { 'Bypass-Tunnel-Reminder': 'true' } });
-    if (r.ok) { showToast('🗑️ Video purged.'); showPage('home'); }
-  } catch(e) { showToast('❌ Delete failed'); }
-}
-
-/* ── Drag & Drop ── */
 const dz = document.getElementById('dropZone');
 dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
 dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
@@ -932,7 +959,71 @@ dz.addEventListener('drop', e => {
 });
 
 /* ═══════════════════════════════════════════════
-   YOUTUBE SHORTS
+   YOUTUBE HUB: SEARCH & TRENDING
+═══════════════════════════════════════════════ */
+async function searchYouTube() {
+  const q = document.getElementById('ytSearchInput').value.trim();
+  if(!q) return;
+  document.getElementById('ytGrid').innerHTML = '<div class="empty">Searching...</div>';
+  try {
+    const r = await fetch(`${API}/youtube/search?q=${encodeURIComponent(q)}`, { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    const d = await r.json();
+    document.getElementById('ytGridTitle').innerHTML = `Results for "${q}" <span class="dot">•</span>`;
+    renderYTGrid(d.videos);
+  } catch(e) { showToast('Search failed (Are you connected to YouTube?)'); }
+}
+
+async function fetchYTTrending() {
+  document.getElementById('ytGrid').innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading Trending Videos...</div></div>';
+  try {
+    const r = await fetch(API + '/youtube/trending', { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    const d = await r.json();
+    if (d.videos) {
+      renderYTGrid(d.videos);
+    } else {
+      document.getElementById('ytGrid').innerHTML = `<div class="empty"><div class="empty-text">Connect your YouTube account in the 'Shorts' tab first!</div></div>`;
+    }
+  } catch(e) { console.error('Trending failed', e); }
+}
+
+function renderYTGrid(vids) {
+  const g = document.getElementById('ytGrid');
+  if(!vids || !vids.length) {
+    g.innerHTML = `<div class="empty">No results found.</div>`;
+    return;
+  }
+  g.innerHTML = vids.map(v => `
+    <div class="vcard" onclick="playYT('${v.videoId}')">
+      <div class="vcard-thumb">
+        <img src="${v.thumbnail}" loading="lazy">
+        <div class="vcard-play"><div class="play-ring">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-title">${v.title}</div>
+        <div class="vcard-meta">
+          <span>${v.channel}</span>
+          <span style="color:var(--t4)">•</span>
+          <div class="vcard-views" style="color:var(--yt-red)">${v.views ? (v.views >= 1000 ? (v.views/1000).toFixed(1)+'k views' : v.views + ' views') : 'Watch Now'}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function playYT(id) {
+  const modal = document.getElementById('ytModal');
+  const frame = document.getElementById('ytFrame');
+  frame.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  modal.style.display = 'flex';
+}
+
+function closeYTPlayer() {
+  document.getElementById('ytModal').style.display = 'none';
+  document.getElementById('ytFrame').src = '';
+}
+
+/* ═══════════════════════════════════════════════
+   YOUTUBE SHORTS PUBLISHING
 ═══════════════════════════════════════════════ */
 function setPrivacy(val, el) {
   ytPrivacy = val;
@@ -1043,6 +1134,7 @@ async function publishToYouTube() {
   }
 }
 
+// Initial Boot
 fetchVideos();
 </script>
 </body>
