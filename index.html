@@ -103,4 +103,62 @@
 
   <main>
     <div id="page-home" class="page page-active">
-      <h1 style="font-size: 36px; letter-spacing: -1.5px; margin-bottom: 30
+      <h1 style="font-size: 36px; letter-spacing: -1.5px; margin-bottom: 30px;">The <span style="color:var(--accent)">Vault</span></h1>
+      <div class="grid" id="mainGrid"></div>
+    </div>
+
+    <div id="page-player" class="page">
+      <div class="player-box">
+        <video id="playerVideo" controls></video>
+      </div>
+      <div class="player-header">
+        <div>
+          <h1 id="vTitle" style="margin:0; font-size:28px;">Video Title</h1>
+          <p id="vMeta" class="v-meta" style="color: var(--accent); font-weight: 600;">0 views</p>
+        </div>
+        <button class="btn-purge" id="purgeBtn">Purge Video</button>
+      </div>
+      <div style="margin-top:24px; padding:24px; background:var(--card); border-radius:12px; border:1px solid var(--border);" id="vDesc"></div>
+    </div>
+
+    <div id="page-upload" class="page">
+      <h1 style="font-size: 36px; letter-spacing: -1.5px; margin-bottom: 30px;">Unleash <span style="color:var(--accent)">Content</span></h1>
+      <div class="upload-card">
+        <div class="form-group"><label>Video File</label><input type="file" id="fileInput" accept="video/*"></div>
+        <div class="form-group"><label>Beast Name</label><input type="text" id="upTitle" placeholder="Video Title"></div>
+        <div class="form-group"><label>Description</label><textarea id="upDesc" rows="4" placeholder="Description"></textarea></div>
+        <div class="form-group"><label>Category</label><select id="upCat">
+            <option>General</option>
+            <option>Material Science</option>
+            <option>Python Development</option>
+            <option>Miyamoto Musashi</option>
+            <option>CUET Preparation</option>
+        </select></div>
+        <button class="btn-primary" style="width:100%; padding:16px; font-size:16px;" id="publishBtn" onclick="publishVideo()">Publish to Vault</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_URL = 'https://beastvault-backend.onrender.com/api'; 
+
+let allVideos = [];
+let hlsInstance = null;
+
+// --- THEME ---
+function toggleTheme() {
+  const body = document.body;
+  const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('beast-theme', newTheme);
+}
+document.body.setAttribute('data-theme', localStorage.getItem('beast-theme') || 'dark');
+
+// --- NAVIGATION ---
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('page-active'));
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById(`page-${pageId}`).classList.add('page-active');
+  if(pageId === 'home') { document.getElementById('btn-home').classList.add('active'); fetchVideos(); }
+  if(pageId !== 'player' && hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
