@@ -13,80 +13,56 @@ const userRoutes  = require('./routes/users');
 
 const app  = express();
 
-// ── Render/Proxy Configuration ──────────────────────────────────────
+// ── 1. GLOBAL CORS (MUST BE FIRST) ──────────────────────────────────
+app.use(cors({
+  origin: '*', // Allows your GitHub site to talk to your local computer
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Bypass-Tunnel-Reminder'],
+  exposedHeaders: ['Bypass-Tunnel-Reminder']
+}));
+
+// ── 2. Handle OPTIONS preflights manually (Extra Safety) ────────────
+app.options('*', cors());
+
+// ── 3. Proxy & Security ─────────────────────────────────────────────
 app.set('trust proxy', 1); 
-
-const PORT = parseInt(process.env.PORT || '4000');
-
-// ── Security headers ─────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: false,
   contentSecurityPolicy: false,
 }));
 
-// ── CORS (THE FIX IS HERE) ───────────────────────────────────────────
-app.use(cors({
-  origin: '*', // Allow all origins (Netlify, GitHub Pages, etc.)
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'Bypass-Tunnel-Reminder' // <--- THIS WAS THE MISSING PIECE!
-  ],
-  credentials: true
-}));
-
-// ── Body parsing ─────────────────────────────────────────────────────
-app.use(express.json({ limit: '10mb' })); // Increased limit for beast-sized metadata
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// ── 4. Body Parsing ──────────────────────────────────────────────────
+app.use(express.json({ limit: '100mb' })); 
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 app.use(compression());
 
-// ── Logging ──────────────────────────────────────────────────────────
+// ── 5. Logging ───────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// ── Global rate limiters ─────────────────────────────────────────────
+// ── 6. Global rate limiters (Moved down) ─────────────────────────────
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000, 
+  max: 2000, // Increased for testing
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many requests — slow down, beast!' },
 });
-
 app.use('/api/', generalLimiter);
 
-// ── Health check ─────────────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok', ts: Date.now(), mode: 'UNLEASHED' }));
-
-// ── API Routes ────────────────────────────────────────────────────────
+// ── 7. API Routes ────────────────────────────────────────────────────
+app.get('/health', (req, res) => res.json({ status: 'ok', mode: 'UNLEASHED' }));
 app.use('/api/auth',   authRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/users',  userRoutes);
 
-// ── 404 handler ──────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
 });
 
-// ── Global error handler ─────────────────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
-  });
-});
-
-// ── Start ─────────────────────────────────────────────────────────────
+const PORT = parseInt(process.env.PORT || '4000');
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`
-  ╔══════════════════════════════════════════╗
-  ║    🦁  BeastVault API — UNLEASHED        ║
-  ║    URL: http://localhost:${PORT}             ║
-  ║    CORS: BYPASS-TUNNEL-REMINDER ALLOWED  ║
-  ╚══════════════════════════════════════════╝
-  `);
+  console.log(`🦁 BeastVault Unleashed on Port ${PORT}`);
 });
 
 module.exports = app;
