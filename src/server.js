@@ -14,7 +14,6 @@ const userRoutes  = require('./routes/users');
 const app  = express();
 
 // ── Render/Proxy Configuration ──────────────────────────────────────
-// This line is required for the rate limiter to work correctly on Render
 app.set('trust proxy', 1); 
 
 const PORT = parseInt(process.env.PORT || '4000');
@@ -25,16 +24,21 @@ app.use(helmet({
   contentSecurityPolicy: false,
 }));
 
-// ── CORS ─────────────────────────────────────────────────────────────
+// ── CORS (THE FIX IS HERE) ───────────────────────────────────────────
 app.use(cors({
-  origin: '*', 
+  origin: '*', // Allow all origins (Netlify, GitHub Pages, etc.)
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Bypass-Tunnel-Reminder' // <--- THIS WAS THE MISSING PIECE!
+  ],
+  credentials: true
 }));
 
 // ── Body parsing ─────────────────────────────────────────────────────
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(express.json({ limit: '10mb' })); // Increased limit for beast-sized metadata
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
 // ── Logging ──────────────────────────────────────────────────────────
@@ -54,7 +58,7 @@ const generalLimiter = rateLimit({
 app.use('/api/', generalLimiter);
 
 // ── Health check ─────────────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok', ts: Date.now() }));
+app.get('/health', (req, res) => res.json({ status: 'ok', ts: Date.now(), mode: 'UNLEASHED' }));
 
 // ── API Routes ────────────────────────────────────────────────────────
 app.use('/api/auth',   authRoutes);
@@ -77,11 +81,11 @@ app.use((err, req, res, next) => {
 // ── Start ─────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`
-  ╔══════════════════════════════════════╗
-  ║   🦁  BeastVault API — UNLEASHED     ║
-  ║   http://localhost:${PORT}              ║
-  ║   CORS: OPEN (Development Mode)      ║
-  ╚══════════════════════════════════════╝
+  ╔══════════════════════════════════════════╗
+  ║    🦁  BeastVault API — UNLEASHED        ║
+  ║    URL: http://localhost:${PORT}             ║
+  ║    CORS: BYPASS-TUNNEL-REMINDER ALLOWED  ║
+  ╚══════════════════════════════════════════╝
   `);
 });
 
