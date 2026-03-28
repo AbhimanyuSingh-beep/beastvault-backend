@@ -1013,7 +1013,12 @@ function renderYTGrid(vids) {
 function playYT(id) {
   const modal = document.getElementById('ytModal');
   const frame = document.getElementById('ytFrame');
-  frame.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  
+  // controls=1 adds the progress bar so you can skip around
+  // rel=0 stops YouTube from showing random weird videos when yours finishes
+  const playerVars = '?autoplay=1&controls=1&rel=0&modestbranding=1';
+  
+  frame.src = `https://www.youtube.com/embed/${id}${playerVars}`;
   modal.style.display = 'flex';
 }
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const { google } = require('googleapis');
-const { query } = require('../db/pool'); // Added DB connection
+const { query } = require('../db/pool'); // DB connection
 const router = express.Router();
 
 const oauth2Client = new google.auth.OAuth2(
@@ -90,14 +90,14 @@ router.post('/disconnect', async (req, res) => {
   res.json({ ok: true });
 });
 
-// GET /api/youtube/search?q=query&maxResults=12
+// GET /api/youtube/search?q=query
 router.get('/search', async (req, res) => {
   const tokens = await getTokens();
   if (!tokens) {
     return res.status(401).json({ error: 'YouTube not connected.' });
   }
   const q = req.query.q || 'trending';
-  const maxResults = parseInt(req.query.maxResults) || 12;
+  const maxResults = parseInt(req.query.maxResults) || 50; // UPGRADED TO 50
   const type = req.query.type || 'video';
 
   try {
@@ -107,7 +107,7 @@ router.get('/search', async (req, res) => {
     const response = await youtube.search.list({
       part: ['snippet'],
       q: q,
-      type: ['video'],
+      type: ['video'], // Pulls both shorts and long form videos
       maxResults,
       videoEmbeddable: 'true',
       ...(type === 'short' ? { videoDuration: 'short' } : {})
@@ -117,7 +117,8 @@ router.get('/search', async (req, res) => {
       videoId: item.id.videoId,
       title: item.snippet.title,
       channel: item.snippet.channelTitle,
-      thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+      // Pulling the high-res thumbnail for a cleaner UI
+      thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
       publishedAt: item.snippet.publishedAt,
       description: item.snippet.description
     }));
@@ -150,7 +151,7 @@ router.get('/trending', async (req, res) => {
       videoId: item.id,
       title: item.snippet.title,
       channel: item.snippet.channelTitle,
-      thumbnail: item.snippet.thumbnails?.medium?.url,
+      thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
       views: parseInt(item.statistics?.viewCount || 0),
       publishedAt: item.snippet.publishedAt
     }));
