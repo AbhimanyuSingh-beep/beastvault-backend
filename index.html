@@ -141,7 +141,8 @@
 </div>
 
 <script>
-const API_URL = 'https://beastvault-backend.onrender.com/api'; 
+// --- CONFIGURE YOUR URL HERE ---
+const API_URL = 'https://beastvault-api-xyz.loca.lt/api'; 
 
 let allVideos = [];
 let hlsInstance = null;
@@ -162,3 +163,119 @@ function showPage(pageId) {
   document.getElementById(`page-${pageId}`).classList.add('page-active');
   if(pageId === 'home') { document.getElementById('btn-home').classList.add('active'); fetchVideos(); }
   if(pageId !== 'player' && hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+}
+
+// --- API ---
+async function fetchVideos() {
+  try {
+    const res = await fetch(`${API_URL}/videos`, {
+      headers: { "Bypass-Tunnel-Reminder": "true" }
+    });
+    const data = await res.json();
+    allVideos = data.videos || [];
+    renderGrid(allVideos);
+  } catch(e) { console.error("Offline"); }
+}
+
+function renderGrid(vids) {
+  const grid = document.getElementById('mainGrid');
+  grid.innerHTML = vids.map(v => `
+    <div class="card" onclick="openPlayer('${v.id}')">
+      <div class="thumb">
+        <div class="badge">${v.status.toUpperCase()}</div>
+        ${v.thumbnail_url ? `<img src="${v.thumbnail_url}">` : '🎬'}
+      </div>
+      <div class="card-body">
+        <div class="v-title">${v.title.toUpperCase()}</div>
+        <div class="v-meta">${v.views || 0} views • ${v.uploader || 'Anonymous'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- VIEW COUNTER LOGIC ---
+async function recordView(id) {
+  try {
+    await fetch(`${API_URL}/videos/${id}/view`, { 
+      method: 'POST',
+      headers: { "Bypass-Tunnel-Reminder": "true" }
+    });
+  } catch(e) { console.error("Could not record view"); }
+}
+
+async function openPlayer(id) {
+  const v = allVideos.find(vid => vid.id === id);
+  if (!v) return;
+
+  showPage('player');
+  
+  // 1. Record the view immediately on open
+  recordView(id);
+
+  document.getElementById('vTitle').innerText = v.title;
+  document.getElementById('vDesc').innerText = v.description || "No context provided.";
+  // 2. Increment view count locally for the current session display
+  document.getElementById('vMeta').innerText = `${(v.views || 0) + 1} views • ${v.uploader || 'Anonymous'}`;
+  document.getElementById('purgeBtn').onclick = () => deleteVideo(v.id);
+
+  const video = document.getElementById('playerVideo');
+  if (Hls.isSupported() && v.hls_url) {
+    hlsInstance = new Hls();
+    hlsInstance.loadSource(v.hls_url);
+    hlsInstance.attachMedia(video);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+  } else if (v.hls_url) {
+    video.src = v.hls_url;
+    video.play();
+  }
+}
+
+async function publishVideo() {
+  const file = document.getElementById('fileInput').files[0];
+  const title = document.getElementById('upTitle').value;
+  if (!file || !title) return alert("Missing Title or File");
+  
+  const btn = document.getElementById('publishBtn');
+  btn.innerText = "UNLEASHING..."; 
+  btn.disabled = true;
+  
+  const fd = new FormData();
+  fd.append('video', file); 
+  fd.append('title', title);
+  fd.append('description', document.getElementById('upDesc').value);
+  fd.append('category', document.getElementById('upCat').value);
+  
+  try {
+    const res = await fetch(`${API_URL}/videos/upload`, { 
+      method: 'POST', 
+      body: fd,
+      headers: { "Bypass-Tunnel-Reminder": "true" }
+    });
+    if (res.ok) { alert("Unleashed!"); showPage('home'); }
+  } catch(e) { alert("Failed"); }
+  finally { btn.innerText = "Publish to Vault"; btn.disabled = false; }
+}
+
+async function deleteVideo(id) {
+  if(!confirm("Purge?")) return;
+  const res = await fetch(`${API_URL}/videos/${id}`, { 
+    method: 'DELETE',
+    headers: { "Bypass-Tunnel-Reminder": "true" }
+  });
+  if(res.ok) showPage('home');
+}
+
+function filterByCat(cat) {
+  const filtered = allVideos.filter(v => v.category === cat);
+  renderGrid(filtered);
+}
+
+document.getElementById('searchInput').oninput = (e) => {
+  const q = e.target.value.toLowerCase();
+  renderGrid(allVideos.filter(v => v.title.toLowerCase().includes(q)));
+};
+
+fetchVideos();
+</script>
+</body>
+</html>
