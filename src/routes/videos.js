@@ -1,70 +1,99 @@
-const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const { query } = require('../db/pool');
-const { requireAuth, optionalAuth } = require('../middleware/auth');
+const express    = require('express');
+const { query }  = require('../db/pool');
+const { optionalAuth } = require('../middleware/auth');
 const { upload } = require('../middleware/uploader');
-const { videoQueue } = require('../config/queue');
+const cloudinary = require('../config/cloudinary');
 
 const router = express.Router();
 
-// ── POST /videos/upload ──────────────────────────────────────────────
+// ── Helper: upload buffer to Cloudinary ─────────────────────────────
+function uploadToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'video',
+        folder: 'beastvault',
+        transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+}
+
+// ── POST /api/videos/upload ──────────────────────────────────────────
 router.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No video file provided' });
 
   const { title, description, category } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
 
-  const storageKey = req.file.key;
-  const sizeBytes  = req.file.size;
-
   try {
+    console.log(`⬆️  Uploading "${title}" to Cloudinary...`);
+
+    // 1. Push to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer);
+
+    const videoUrl     = result.secure_url;   // playable video URL
+    const thumbnailUrl = cloudinary.url(result.public_id + '.jpg', {
+      resource_type: 'video',
+      transformation: [{ width: 640, height: 360, crop: 'fill' }],
+      secure: true,
+    });
+
+    // 2. Get or use first user
     const userRes = await query('SELECT id FROM users LIMIT 1');
-    if (userRes.rowCount === 0) {
-        return res.status(500).json({ error: 'No users found in database. Create a user first!' });
-    }
-    
+    if (userRes.rowCount === 0)
+      return res.status(500).json({ error: 'No users found. Create a user first.' });
+
     const userId = req.user ? req.user.id : userRes.rows[0].id;
 
+    // 3. Save to DB — status is immediately 'ready' (Cloudinary already processed it)
     const { rows } = await query(
-      `INSERT INTO videos (user_id, title, description, category, status, raw_storage_key, size_bytes)
-       VALUES ($1, $2, $3, $4, 'processing', $5, $6)
+      `INSERT INTO videos
+         (user_id, title, description, category, status, hls_url, thumbnail_url, raw_storage_key, size_bytes)
+       VALUES ($1, $2, $3, $4, 'ready', $5, $6, $7, $8)
        RETURNING id`,
-      [userId, title, description || '', category || 'General', storageKey, sizeBytes]
+      [
+        userId,
+        title,
+        description || '',
+        category || 'General',
+        videoUrl,
+        thumbnailUrl,
+        result.public_id,
+        req.file.size,
+      ]
     );
-    const videoId = rows[0].id;
 
-    await videoQueue.add(
-      { videoId, userId, storageKey },
-      {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 10000 },
-        removeOnComplete: 50,
-        removeOnFail: 20,
-      }
-    );
+    console.log(`✅ Video "${title}" is LIVE — ID: ${rows[0].id}`);
 
     res.status(202).json({
-      message: 'Video uploaded and queued for processing',
-      videoId,
-      status: 'processing',
+      message: 'Video unleashed to the vault!',
+      videoId: rows[0].id,
+      status:  'ready',
+      url:     videoUrl,
     });
   } catch (err) {
-    console.error("UPLOAD ERROR:", err);
-    res.status(500).json({ error: 'Upload failed' });
+    console.error('UPLOAD ERROR:', err);
+    res.status(500).json({ error: 'Upload failed: ' + err.message });
   }
 });
 
-// ── GET /videos ──────────────────────────────────────────────────────
+// ── GET /api/videos ──────────────────────────────────────────────────
 router.get('/', optionalAuth, async (req, res) => {
-  const limit  = Math.min(parseInt(req.query.limit  || '20'), 50);
-  const offset = parseInt(req.query.offset || '0');
+  const limit    = Math.min(parseInt(req.query.limit  || '20'), 50);
+  const offset   = parseInt(req.query.offset || '0');
   const category = req.query.category;
 
   let sql = `
     SELECT v.id, v.title, v.description, v.category,
            v.hls_url, v.thumbnail_url, v.views, v.duration_secs,
            v.status, v.created_at,
-           u.id   AS uploader_id,
+           u.id AS uploader_id,
            u.username AS uploader,
            u.avatar_url,
            COUNT(l.user_id) AS likes
@@ -96,52 +125,31 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// ── DELETE /videos/:id ───────────────────────────────────────────────
-// UNLOCKED: Removed requireAuth so you can purge test videos easily
-router.delete('/:id', async (req, res) => {
+// ── GET /api/videos/search ───────────────────────────────────────────
+router.get('/search', optionalAuth, async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (!q) return res.json({ videos: [] });
   try {
     const { rows } = await query(
-      'SELECT raw_storage_key, hls_url FROM videos WHERE id=$1',
-      [req.params.id]
+      `SELECT v.id, v.title, v.description, v.category,
+              v.hls_url, v.thumbnail_url, v.views, v.duration_secs,
+              v.created_at, u.username AS uploader, u.avatar_url,
+              ts_rank(v.search_vector, query) AS rank
+       FROM videos v
+       JOIN users u ON u.id = v.user_id,
+       plainto_tsquery('english', $1) query
+       WHERE v.status = 'ready' AND v.search_vector @@ query
+       ORDER BY rank DESC LIMIT 30`,
+      [q]
     );
-    
-    if (!rows[0]) return res.status(404).json({ error: 'Video not found' });
-
-    // Delete from Database
-    await query('DELETE FROM videos WHERE id=$1', [req.params.id]);
-    
-    res.json({ ok: true, message: "Video purged from vault" });
+    res.json({ videos: rows, query: q });
   } catch (err) {
-    console.error("DELETE ERROR:", err);
-    res.status(500).json({ error: 'Delete failed' });
+    console.error(err);
+    res.status(500).json({ error: 'Search failed' });
   }
 });
 
-// ── GET /videos/search ───────────────────────────────────────────────
-router.get('/search', optionalAuth, async (req, res) => {
-    const q = (req.query.q || '').trim();
-    if (!q) return res.json({ videos: [] });
-    try {
-      const { rows } = await query(
-        `SELECT v.id, v.title, v.description, v.category,
-                v.hls_url, v.thumbnail_url, v.views, v.duration_secs,
-                v.created_at, u.username AS uploader, u.avatar_url,
-                ts_rank(v.search_vector, query) AS rank
-         FROM videos v
-         JOIN users u ON u.id = v.user_id,
-         plainto_tsquery('english', $1) query
-         WHERE v.status = 'ready' AND v.search_vector @@ query
-         ORDER BY rank DESC
-         LIMIT 30`,
-        [q]
-      );
-      res.json({ videos: rows, query: q });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Search failed' });
-    }
-  });
-  
+// ── GET /api/videos/:id ──────────────────────────────────────────────
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { rows } = await query(
@@ -160,17 +168,39 @@ router.get('/:id', optionalAuth, async (req, res) => {
     if (!rows[0]) return res.status(404).json({ error: 'Video not found' });
     res.json({ video: rows[0] });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Failed to fetch video' });
   }
 });
-  
+
+// ── POST /api/videos/:id/view ────────────────────────────────────────
 router.post('/:id/view', async (req, res) => {
   try {
     await query('UPDATE videos SET views = views + 1 WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to record view' });
+  }
+});
+
+// ── DELETE /api/videos/:id ───────────────────────────────────────────
+router.delete('/:id', async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT raw_storage_key FROM videos WHERE id=$1',
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Video not found' });
+
+    // Delete from Cloudinary
+    if (rows[0].raw_storage_key) {
+      await cloudinary.uploader.destroy(rows[0].raw_storage_key, { resource_type: 'video' });
+    }
+
+    await query('DELETE FROM videos WHERE id=$1', [req.params.id]);
+    res.json({ ok: true, message: 'Video purged from vault' });
+  } catch (err) {
+    console.error('DELETE ERROR:', err);
+    res.status(500).json({ error: 'Delete failed' });
   }
 });
 
