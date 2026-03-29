@@ -204,4 +204,44 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ── GET /api/videos/:id/comments ─────────────────────────────────────
+router.get('/:id/comments', async (req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT id, username, content, created_at 
+       FROM comments 
+       WHERE video_id = $1 
+       ORDER BY created_at DESC`,
+      [req.params.id]
+    );
+    res.json({ comments: rows });
+  } catch (err) {
+    console.error('FETCH COMMENTS ERROR:', err);
+    res.status(500).json({ error: 'Failed to fetch comments' });
+  }
+});
+
+// ── POST /api/videos/:id/comments ────────────────────────────────────
+router.post('/:id/comments', optionalAuth, async (req, res) => {
+  const { content, username } = req.body;
+  const videoId = req.params.id;
+  const userId = req.user ? req.user.id : null;
+  const authorName = username || (req.user ? req.user.username : 'Anonymous');
+
+  if (!content) return res.status(400).json({ error: 'Comment content is required' });
+
+  try {
+    const { rows } = await query(
+      `INSERT INTO comments (video_id, user_id, username, content)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, username, content, created_at`,
+      [videoId, userId, authorName, content]
+    );
+    res.status(201).json({ comment: rows[0] });
+  } catch (err) {
+    console.error('POST COMMENT ERROR:', err);
+    res.status(500).json({ error: 'Failed to post comment' });
+  }
+});
+
 module.exports = router;
