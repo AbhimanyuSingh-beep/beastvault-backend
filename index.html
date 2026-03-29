@@ -47,7 +47,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .btn-cta{height:var(--touch-min);padding:0 16px;background:linear-gradient(135deg,var(--p),var(--p-light));border:none;border-radius:var(--r-sm);color:#fff;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.2s;box-shadow:0 2px 16px rgba(225,29,72,0.4);flex-shrink:0;}
 .btn-cta:active{transform:scale(0.97);}
 
-/* AUTH BTN in nav */
 .btn-auth{height:var(--touch-min);padding:0 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--p-glow);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;display:flex;align-items:center;gap:6px;}
 .btn-auth:active{transform:scale(0.97);}
 .auth-avatar{width:24px;height:24px;border-radius:50%;background:var(--p-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--p-glow);}
@@ -120,11 +119,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .ctrl-time{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-left:4px;}
 .vol-slider{width:72px;accent-color:var(--p);cursor:pointer;height:4px;border-radius:2px;}
 .player-glow-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--cyan),var(--orange));}
-
-/* WEBRTC FLOATING CAMS */
-.webcam-container{display:none; position:absolute; top:20px; right:20px; z-index:50; width:220px; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.2); background:#000;}
-.remote-video{width:100%; display:block; background:#111; transform:scaleX(-1);} /* Mirror remote for natural look */
-.local-video{width:35%; position:absolute; bottom:8px; right:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.3); background:#000; transform:scaleX(-1); box-shadow: 0 4px 12px rgba(0,0,0,0.5);}
 
 .player-info-card{width:100%;max-width:1200px;margin-top:20px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;}
 .player-top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
@@ -262,6 +256,18 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .toast{position:fixed;bottom:calc(var(--mob-nav) + 12px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-md);padding:11px 18px;font-size:14px;font-weight:600;color:var(--t1);box-shadow:0 8px 28px rgba(0,0,0,0.4);z-index:9999;opacity:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* FLOATING WEBCAM BOX (DRAGGABLE & RESIZABLE) */
+.webcam-container{
+  display:none; position:fixed; top:80px; right:20px; z-index:9999; 
+  width:260px; min-width:150px; min-height:100px;
+  border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.9); 
+  border:1px solid rgba(255,255,255,0.2); background:#000;
+  resize:both; overflow:hidden; /* Makes it resizable */
+  cursor:move; /* Shows draggable cursor */
+}
+.remote-video{width:100%; height:100%; display:block; object-fit:cover; background:#111; transform:scaleX(-1); pointer-events:none;}
+.local-video{width:30%; position:absolute; bottom:8px; right:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.3); background:#000; transform:scaleX(-1); box-shadow:0 4px 12px rgba(0,0,0,0.5); pointer-events:none;}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .sidebar{display:none;}
@@ -299,7 +305,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   .cat-pill{font-size:12px;padding:7px 14px;}
   .section-title{font-size:15px;}
   .modal-box{padding:24px 20px;}
-  .webcam-container{width:150px; top:10px; right:10px;}
+  .webcam-container{width:150px; top:70px; right:10px;}
 }
 @media(max-width:480px){.vcard-thumb{width:110px;}}
 @media(min-width:769px){.mob-nav{display:none;}}
@@ -308,6 +314,11 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 <body>
 <div class="bg-mesh"></div>
 <div class="top-stripe"></div>
+
+<div id="webcamContainer" class="webcam-container">
+  <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+  <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+</div>
 
 <div class="modal-overlay" id="authModal">
   <div class="modal-box">
@@ -404,12 +415,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   <div id="page-player" class="page">
     <div class="player-wrap">
       <div class="player-shell" id="videoContainer">
-        
-        <div id="webcamContainer" class="webcam-container">
-          <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-          <video id="localVideo" class="local-video" autoplay playsinline muted></video>
-        </div>
-
         <video id="playerVideo" playsinline onclick="togglePlay()"></video>
         <div class="custom-controls" id="customControls">
           <div class="progress-area" id="progressArea" onclick="seekVideo(event)">
@@ -444,7 +449,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
         <div class="player-top-row">
           <h1 class="player-title" id="vTitle">Video Title</h1>
           <div style="display:flex; gap:10px; align-items:center;">
-            <button id="liveReviewBtn" onclick="startLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Call & Sync</button>
+            <button id="liveReviewBtn" onclick="startVaultLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Call & Sync</button>
             <button class="btn-purge" id="purgeBtn">✕ Purge</button>
           </div>
         </div>
@@ -600,8 +605,12 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
 <div id="ytModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;align-items:center;justify-content:center;padding:16px;">
   <div style="width:100%;max-width:1200px;aspect-ratio:16/9;position:relative;border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(225,29,72,0.15);border:1px solid rgba(225,29,72,0.35);background:#000;">
+    <div style="position:absolute; top:14px; left:14px; z-index:1001; display:flex; gap:10px;">
+      <button id="ytLiveBtn" onclick="startYTLiveReview()" style="padding:10px 16px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-md); color:#fff; font-weight:800; cursor:pointer; font-size:12px;">👥 Live Call & Sync</button>
+    </div>
     <button onclick="closeYTPlayer()" style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:44px;height:44px;color:white;font-size:20px;cursor:pointer;z-index:1000;display:flex;align-items:center;justify-content:center;">✕</button>
-    <iframe id="ytFrame" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;"></iframe>
+    
+    <div id="ytFrame" style="width:100%; height:100%;"></div>
   </div>
 </div>
 
@@ -631,12 +640,15 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
 const API = 'https://beastvault-backend.onrender.com/api';
 let allVideos = [], hlsInst = null, currentTheme = 'dark';
 let ytPrivacy = 'public';
 let currentUser = null;
 let currentVideoId = null;
+let currentYTVideoId = null;
 
 /* ══ AUTH ══ */
 let authMode = 'login';
@@ -741,15 +753,6 @@ function updateAuthUI() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const ci = document.getElementById('commentInput');
-  if (ci) {
-    ci.addEventListener('focus', () => {
-      if (currentUser) document.getElementById('commentSubmitBtn').style.display = '';
-    });
-  }
-});
-
 /* ══ THEME ══ */
 function toggleTheme() {
   currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -788,19 +791,11 @@ function showPage(id) {
   if (id === 'home') { document.getElementById('sbar-home')?.classList.add('active'); document.getElementById('mob-home')?.classList.add('active'); fetchVideos(); }
   if (id === 'yt-hub') { document.getElementById('sbar-yt-hub')?.classList.add('active'); fetchYTTrending(); }
   if (id === 'youtube') { document.getElementById('sbar-yt')?.classList.add('active'); checkYouTubeStatus(); populateYTVideoSelect(); }
+  
   if (id !== 'player') {
     const v = document.getElementById('playerVideo');
     if (v) { v.pause(); v.src = ''; }
     if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
-    
-    // Stop Webcams if leaving player
-    if(localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
-        document.getElementById('webcamContainer').style.display = 'none';
-        if(peerConnection) peerConnection.close();
-        document.getElementById('liveReviewBtn').innerHTML = '👥 Live Call & Sync';
-    }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -990,15 +985,6 @@ async function publishVideo() {
   finally { btn.textContent = '⚡ PUBLISH TO VAULT'; btn.disabled = false; }
 }
 
-const dz = document.getElementById('dropZone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('dragover');
-  const f = e.dataTransfer.files[0];
-  if (f && f.type.startsWith('video/')) { const input = document.getElementById('fileInput'); const dt = new DataTransfer(); dt.items.add(f); input.files = dt.files; onFileChange(input); }
-});
-
 /* ══ PLAYER CONTROLS ══ */
 const vid = document.getElementById('playerVideo');
 const pBar = document.getElementById('progressBar');
@@ -1045,12 +1031,14 @@ vidContainer.addEventListener('mousemove', () => {
   controlTimeout = setTimeout(() => { if (!vid.paused) { customControls.style.opacity = '0'; vidContainer.style.cursor = 'none'; } }, 2500);
 });
 vidContainer.addEventListener('mouseleave', () => { if (!vid.paused) customControls.style.opacity = '0'; });
-vidContainer.addEventListener('touchstart', () => {
-  customControls.classList.add('active'); clearTimeout(controlTimeout);
-  controlTimeout = setTimeout(() => { if (!vid.paused) customControls.classList.remove('active'); }, 3000);
-});
 
 /* ══ YOUTUBE HUB ══ */
+let ytPlayer;
+
+function onYouTubeIframeAPIReady() {
+  console.log("YouTube API Ready");
+}
+
 async function searchYouTube() {
   const q = document.getElementById('ytSearchInput').value.trim();
   if(!q) return;
@@ -1094,12 +1082,24 @@ function renderYTGrid(vids) {
 }
 
 function playYT(id) {
-  const modal = document.getElementById('ytModal');
-  const frame = document.getElementById('ytFrame');
-  frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&controls=1&rel=0&modestbranding=1`;
-  modal.style.display = 'flex';
+  currentYTVideoId = id;
+  document.getElementById('ytModal').style.display = 'flex';
+  
+  if (!ytPlayer) {
+    ytPlayer = new YT.Player('ytFrame', {
+      videoId: id,
+      playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1 },
+      events: { 'onStateChange': onYTStateChange }
+    });
+  } else {
+    ytPlayer.loadVideoById(id);
+  }
 }
-function closeYTPlayer() { document.getElementById('ytModal').style.display = 'none'; document.getElementById('ytFrame').src = ''; }
+
+function closeYTPlayer() { 
+  document.getElementById('ytModal').style.display = 'none'; 
+  if(ytPlayer) ytPlayer.stopVideo(); 
+}
 
 /* ══ YOUTUBE SHORTS PUBLISH ══ */
 function setPrivacy(val, el) { ytPrivacy = val; document.querySelectorAll('.privacy-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
@@ -1183,13 +1183,21 @@ let isRemoteAction = false;
 // WEBRTC VARIABLES
 let peerConnection;
 let localStream;
-const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }; // Free Google Server
+// Added fallback Google STUN servers to fix the connection bug!
+const rtcConfig = { 
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ] 
+}; 
 
 // 1. Get Camera/Mic Access
 async function startWebcams() {
   try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    document.getElementById('localVideo').srcObject = localStream;
+    if (!localStream) {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      document.getElementById('localVideo').srcObject = localStream;
+    }
     document.getElementById('webcamContainer').style.display = 'block';
   } catch(e) {
     showToast('⚠️ Camera/Mic access denied');
@@ -1205,9 +1213,13 @@ function createPeerConnection() {
     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
   }
 
-  // When remote client sends video, put it in the big box
+  // Ensure remote stream attaches correctly
   peerConnection.ontrack = (event) => {
-    document.getElementById('remoteVideo').srcObject = event.streams[0];
+    const remoteVid = document.getElementById('remoteVideo');
+    if (remoteVid.srcObject !== event.streams[0]) {
+      remoteVid.srcObject = event.streams[0];
+      console.log("Remote stream received!");
+    }
   };
 
   // Find network paths
@@ -1218,8 +1230,8 @@ function createPeerConnection() {
   };
 }
 
-// 3. Generate Link & Join Room (HOST)
-async function startLiveReview() {
+// 3. Generate Link (Vault Video)
+async function startVaultLiveReview() {
   if (!currentVideoId) return;
   currentRoom = Math.random().toString(36).substring(2, 9); 
   const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}&room=${currentRoom}`;
@@ -1227,10 +1239,24 @@ async function startLiveReview() {
   navigator.clipboard.writeText(link);
   showToast('🔗 Invite Link Copied! Send to client.');
   
-  await startWebcams(); // Start host camera
+  await startWebcams();
   socket.emit('join-room', currentRoom);
-  
   const btn = document.getElementById('liveReviewBtn');
+  if(btn) btn.innerHTML = '🟢 Room Active';
+}
+
+// 3b. Generate Link (YouTube Video)
+async function startYTLiveReview() {
+  if (!currentYTVideoId) return;
+  currentRoom = Math.random().toString(36).substring(2, 9); 
+  const link = `${window.location.origin}${window.location.pathname}?ytvideo=${currentYTVideoId}&room=${currentRoom}`;
+  
+  navigator.clipboard.writeText(link);
+  showToast('🔗 YouTube Invite Link Copied!');
+  
+  await startWebcams();
+  socket.emit('join-room', currentRoom);
+  const btn = document.getElementById('ytLiveBtn');
   if(btn) btn.innerHTML = '🟢 Room Active';
 }
 
@@ -1240,7 +1266,6 @@ socket.on('user-joined', async () => {
   if (!localStream) await startWebcams();
   createPeerConnection();
   
-  // Host creates the connection offer
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   socket.emit('webrtc-offer', { room: currentRoom, offer: offer });
@@ -1268,18 +1293,57 @@ socket.on('webrtc-ice-candidate', async (candidate) => {
   catch(e) { console.error('ICE error', e); }
 });
 
-// 8. Player Sync Logic
-vid.addEventListener('play', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', time: vid.currentTime }); });
-vid.addEventListener('pause', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', time: vid.currentTime }); });
-vid.addEventListener('seeked', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', time: vid.currentTime }); });
+// 8. HTML5 Player Sync Logic
+vid.addEventListener('play', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', player: 'vault', time: vid.currentTime }); });
+vid.addEventListener('pause', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', player: 'vault', time: vid.currentTime }); });
+vid.addEventListener('seeked', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', player: 'vault', time: vid.currentTime }); });
 
+// 9. YouTube Player Sync Logic
+function onYTStateChange(event) {
+  if (!isRemoteAction && currentRoom) {
+    if (event.data == YT.PlayerState.PLAYING) {
+      socket.emit('video-action', { room: currentRoom, action: 'play', player: 'yt', time: ytPlayer.getCurrentTime() });
+    } else if (event.data == YT.PlayerState.PAUSED) {
+      socket.emit('video-action', { room: currentRoom, action: 'pause', player: 'yt', time: ytPlayer.getCurrentTime() });
+    }
+  }
+}
+
+// 10. Handle Incoming Commands
 socket.on('video-action', (data) => {
   isRemoteAction = true; 
-  if (data.action === 'play') { vid.currentTime = data.time; vid.play(); playIcon.setAttribute('d', SVG_PAUSE); showToast('▶ Remote Play'); }
-  else if (data.action === 'pause') { vid.currentTime = data.time; vid.pause(); playIcon.setAttribute('d', SVG_PLAY); showToast('⏸ Remote Pause'); }
-  else if (data.action === 'seek') { vid.currentTime = data.time; }
-  setTimeout(() => { isRemoteAction = false; }, 150);
+  
+  if (data.player === 'yt' && ytPlayer) {
+    if (data.action === 'play') { ytPlayer.seekTo(data.time); ytPlayer.playVideo(); showToast('▶ Remote Play'); }
+    else if (data.action === 'pause') { ytPlayer.seekTo(data.time); ytPlayer.pauseVideo(); showToast('⏸ Remote Pause'); }
+  } else {
+    if (data.action === 'play') { vid.currentTime = data.time; vid.play(); playIcon.setAttribute('d', SVG_PAUSE); showToast('▶ Remote Play'); }
+    else if (data.action === 'pause') { vid.currentTime = data.time; vid.pause(); playIcon.setAttribute('d', SVG_PLAY); showToast('⏸ Remote Pause'); }
+    else if (data.action === 'seek') { vid.currentTime = data.time; }
+  }
+  
+  setTimeout(() => { isRemoteAction = false; }, 250);
 });
+
+/* ══ MAKE WEBCAM DRAGGABLE ══ */
+const camBox = document.getElementById('webcamContainer');
+let isDragging = false, dragX, dragY;
+
+camBox.addEventListener('mousedown', (e) => {
+  // If clicking the bottom right corner, let it resize instead of drag
+  if (e.offsetX > camBox.clientWidth - 20 && e.offsetY > camBox.clientHeight - 20) return;
+  isDragging = true;
+  dragX = e.clientX - camBox.getBoundingClientRect().left;
+  dragY = e.clientY - camBox.getBoundingClientRect().top;
+});
+document.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    camBox.style.left = (e.clientX - dragX) + 'px';
+    camBox.style.top = (e.clientY - dragY) + 'px';
+    camBox.style.right = 'auto'; // Disable CSS right anchor so it moves freely
+  }
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
 
 /* ══ BOOT ══ */
 const savedUser = localStorage.getItem('bv-user');
@@ -1288,20 +1352,31 @@ if (savedUser) { try { currentUser = JSON.parse(savedUser); updateAuthUI(); } ca
 const urlParams = new URLSearchParams(window.location.search);
 const sharedRoom = urlParams.get('room');
 const sharedVideo = urlParams.get('video');
+const sharedYTVideo = urlParams.get('ytvideo');
 
 async function boot() {
   await fetchVideos(); 
-  if (sharedRoom && sharedVideo) {
+  
+  if (sharedRoom) {
     currentRoom = sharedRoom;
     socket.emit('join-room', currentRoom);
-    openPlayer(sharedVideo);
-    const btn = document.getElementById('liveReviewBtn');
-    if(btn) btn.innerHTML = '🟢 Room Active';
-    showToast('Joined Live Review Room!');
-    window.history.replaceState({}, document.title, window.location.pathname); 
-    
-    // Auto-start webcam for the person joining the link
     startWebcams();
+    
+    if (sharedVideo) {
+      openPlayer(sharedVideo);
+      const btn = document.getElementById('liveReviewBtn');
+      if(btn) btn.innerHTML = '🟢 Room Active';
+      showToast('Joined Live Review Room!');
+    } else if (sharedYTVideo) {
+      // Small delay to ensure YT API is fully loaded
+      setTimeout(() => {
+        playYT(sharedYTVideo);
+        const btn = document.getElementById('ytLiveBtn');
+        if(btn) btn.innerHTML = '🟢 Room Active';
+        showToast('Joined YouTube Watch Party!');
+      }, 1000);
+    }
+    window.history.replaceState({}, document.title, window.location.pathname); 
   }
 }
 boot();
