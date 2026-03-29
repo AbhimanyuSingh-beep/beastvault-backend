@@ -21,22 +21,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
 
-/* NEUBRUTALISM UI CORE */
+/* --- NEUBRUTALISM UI CORE --- */
 .bg-mesh{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 10% 10%, rgba(225,29,72,0.15), transparent 40%), radial-gradient(circle at 90% 90%, rgba(245,158,11,0.1), transparent 40%);}
 
 .btn-brutal{
-  background: var(--p);
-  border: 3px solid #000;
-  box-shadow: 4px 4px 0px #000;
-  padding: 12px 24px;
-  color: #fff;
-  font-weight: 900;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: var(--r-md);
-  display: flex; align-items: center; gap: 10px;
-  transition: all 0.1s;
-  text-transform: uppercase;
+  background: var(--p); border: 3px solid #000; box-shadow: 4px 4px 0px #000;
+  padding: 12px 24px; color: #fff; font-weight: 900; font-size: 16px;
+  cursor: pointer; border-radius: var(--r-md); display: flex; align-items: center; gap: 10px;
+  transition: all 0.1s; text-transform: uppercase;
 }
 .btn-brutal:hover{ transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
 .btn-brutal:active{ transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
@@ -47,9 +39,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overfl
   display: flex; align-items: center; justify-content: center; font-size: 20px;
 }
 
-/* LAYOUT STRUCTURE */
+/* --- LAYOUT STRUCTURE --- */
 .topnav{position:fixed;top:0;left:0;right:0;height:75px;background:rgba(8,8,8,0.9);backdrop-filter:blur(10px);border-bottom:3px solid #000;display:flex;align-items:center;padding:0 24px;z-index:900;}
-.topnav-logo{font-size:24px;font-weight:900;letter-spacing:-1.5px;color:var(--p);cursor:pointer;}
+.topnav-logo{font-size:24px; font-weight:900; letter-spacing:-1.5px; color:var(--p); cursor:pointer;}
 
 .sidebar{position:fixed;left:0;top:75px;bottom:0;width:85px;background:var(--bg2);border-right:3px solid #000;display:flex;flex-direction:column;align-items:center;padding:25px 0;gap:18px;z-index:800;}
 .sbar-item{width:60px; height:60px; border-radius:14px; border:3px solid transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:26px; transition:0.2s;}
@@ -60,35 +52,24 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overfl
 .page{display:none; padding:35px;}
 .page.active{display:block;}
 
-/* THOUGHT BOARD */
+/* --- COMPONENTS --- */
 .thought-container{
   margin-top: 35px; background: var(--bg3); border: 3px solid #000;
   border-radius: var(--r-lg); box-shadow: 10px 10px 0px #000; overflow: hidden;
 }
-.thought-header{
-  background: var(--yellow); padding: 15px 25px; border-bottom: 3px solid #000;
-  display: flex; justify-content: space-between; align-items: center; color: #000;
-}
-.thought-area{
-  width: 100%; min-height: 250px; background: #000; color: var(--green);
-  font-family: 'JetBrains Mono', monospace; padding: 25px; border: none;
-  outline: none; font-size: 16px; line-height: 1.7; resize: vertical;
-}
+.thought-header{ background: var(--yellow); padding: 15px 25px; border-bottom: 3px solid #000; display: flex; justify-content: space-between; align-items: center; color: #000; }
+.thought-area{ width: 100%; min-height: 250px; background: #000; color: var(--green); font-family: 'JetBrains Mono', monospace; padding: 25px; border: none; outline: none; font-size: 16px; line-height: 1.7; resize: vertical; }
 
 .vgrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:30px;}
-.vcard{
-  background:var(--bg2); border:3px solid #000; border-radius:var(--r-md);
-  overflow:hidden; box-shadow: 6px 6px 0px #000; cursor: pointer; transition: 0.2s;
-}
+.vcard{ background:var(--bg2); border:3px solid #000; border-radius:var(--r-md); overflow:hidden; box-shadow: 6px 6px 0px #000; cursor: pointer; transition: 0.2s; }
 .vcard:hover{ transform: translateY(-8px); box-shadow: 10px 10px 0px #000; border-color: var(--p); }
 .vcard-thumb{aspect-ratio:16/9; background:#000; position:relative; overflow:hidden;}
 .vcard-body{padding:20px;}
 
 .input-brutal{padding:15px; background:var(--bg3); border:3px solid #000; border-radius:12px; color:#fff; font-weight:700; outline:none; width:100%;}
+.field-label{font-weight:900; color:var(--t3); margin-bottom:8px; display:block; font-size:12px; text-transform:uppercase; letter-spacing:1px;}
 
-@media(max-width:768px){
-  .sidebar{display:none;} .main{margin-left:0; padding-bottom:70px;}
-}
+@media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0; padding-bottom:70px;} }
 </style>
 </head>
 <body>
@@ -126,14 +107,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overfl
           <h1 id="vTitle" style="font-size:32px; font-weight:900;">Video Title</h1>
           <p id="vUploader" style="color:var(--t3); margin-top:5px; font-weight:800;">@beast</p>
         </div>
-        
         <div style="display:flex; gap:12px;">
-            <button class="btn-brutal" onclick="copyShareLink()" style="background:var(--cyan); color:#000;">
-                🔗 <span>SHARE</span>
-            </button>
-            <button class="btn-brutal" onclick="startVaultLiveReview()" style="background:var(--yellow); color:#000;">
-                👥 <span>LIVE SYNC</span>
-            </button>
+            <button class="btn-brutal" onclick="copyShareLink()" style="background:var(--cyan); color:#000;">🔗 <span>SHARE</span></button>
+            <button class="btn-brutal" onclick="startVaultLiveReview()" style="background:var(--yellow); color:#000;">👥 <span>LIVE SYNC</span></button>
         </div>
       </div>
 
@@ -143,11 +119,32 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overfl
               <span style="font-weight:900; letter-spacing:1px; font-size:14px;">📝 SHARED BOARD</span>
               <span id="syncIndicator" style="font-family:'JetBrains Mono'; font-size:11px; font-weight:900;">STATIONARY</span>
           </div>
-          <button class="btn-brutal" onclick="exportThoughtsAsPDF()" style="padding:6px 12px; font-size:11px; background:#fff; color:#000; box-shadow: 2px 2px 0px #000;">
-              💾 <span>EXPORT PDF</span>
-          </button>
+          <button class="btn-brutal" onclick="exportThoughtsAsPDF()" style="padding:6px 12px; font-size:11px; background:#fff; color:#000;">💾 <span>EXPORT PDF</span></button>
         </div>
-        <textarea id="thoughtArea" class="thought-area" placeholder="Write code, project notes, or thoughts here..."></textarea>
+        <textarea id="thoughtArea" class="thought-area" placeholder="Write code or project notes here..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-yt-hub" class="page">
+    <h1 style="font-size:40px; font-weight:900; margin-bottom:30px;">YT EXPLORER <span style="color:var(--yt-red)">▶</span></h1>
+    <div style="display:flex; gap:15px; margin-bottom:40px;">
+      <input id="ytSearchInput" class="input-brutal" placeholder="Search YouTube library..." onkeyup="if(event.key==='Enter') searchYouTube()">
+      <button class="btn-brutal" onclick="searchYouTube()" style="background:#fff; color:#000;">🔍 <span>FIND</span></button>
+    </div>
+    <div class="vgrid" id="ytGrid"></div>
+  </div>
+
+  <div id="page-youtube" class="page">
+    <div style="max-width:900px; margin:0 auto;">
+      <h1 style="font-size:40px; font-weight:900; margin-bottom:30px;">PUBLISH SHORTS <span style="color:var(--orange)">⚡</span></h1>
+      <div style="background:var(--bg2); border:3px solid #000; padding:40px; border-radius:var(--r-lg); box-shadow:12px 12px 0px #000; display:grid; gap:25px;">
+        <div>
+          <label class="field-label">Source Vault Video</label>
+          <select id="ytVideoSelect" class="input-brutal"></select>
+        </div>
+        <input id="ytTitle" class="input-brutal" placeholder="YouTube Shorts Title...">
+        <button class="btn-brutal" onclick="publishToYouTube()" id="ytPublishBtn" style="width:100%; justify-content:center;">▶ <span>PUSH TO YOUTUBE</span></button>
       </div>
     </div>
   </div>
@@ -156,11 +153,11 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overfl
     <div style="max-width:550px; margin: 0 auto; background:var(--bg2); border:3px solid #000; padding:45px; border-radius:var(--r-lg); box-shadow:15px 15px 0px #000;">
       <h2 style="font-size:36px; font-weight:900; margin-bottom:30px;">NEW UNLEASH ⚡</h2>
       <div style="display:grid; gap:25px;">
-        <input type="file" id="fileInput" style="padding:15px; border:3px dashed var(--t3); border-radius:15px; cursor:pointer;">
+        <input type="file" id="fileInput" style="padding:15px; border:3px dashed var(--t3); border-radius:15px;">
         <input type="text" id="upTitle" class="input-brutal" placeholder="BOLD VIDEO TITLE...">
         <div style="display:flex; align-items:center; gap:15px; background:rgba(0,0,0,0.4); padding:20px; border-radius:15px; border:2px solid #000;">
-          <input type="checkbox" id="upPrivate" style="width:25px; height:25px; cursor:pointer; accent-color:var(--p);">
-          <label for="upPrivate" style="font-weight:900; cursor:pointer; font-size:14px;">PRIVATE VAULT (HIDDEN FROM PUBLIC)</label>
+          <input type="checkbox" id="upPrivate" style="width:25px; height:25px; accent-color:var(--p);">
+          <label for="upPrivate" style="font-weight:900; font-size:14px;">PRIVATE VAULT (HIDDEN FROM PUBLIC)</label>
         </div>
         <button class="btn-brutal" id="publishBtn" onclick="publishVideo()" style="width:100%; justify-content:center;">📦 <span>PUBLISH TO VAULT</span></button>
       </div>
@@ -168,116 +165,113 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overfl
   </div>
 </main>
 
-<div id="webcamContainer" class="webcam-container" style="display:none; position:fixed; top:100px; right:40px; z-index:9999; width:300px; border:4px solid #000; border-radius:20px; background:#000; box-shadow:15px 15px 0px rgba(0,0,0,0.6); overflow:hidden;">
+<div id="webcamContainer" style="display:none; position:fixed; top:100px; right:40px; z-index:9999; width:300px; border:4px solid #000; border-radius:20px; background:#000; box-shadow:15px 15px 0px rgba(0,0,0,0.6); overflow:hidden;">
   <div style="padding:12px 20px; background:var(--p); border-bottom:3px solid #000; display:flex; justify-content:space-between; align-items:center; color:#fff; font-weight:900;">
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span id="memberBadge" style="background:#000; color:#fff; padding:2px 8px; border-radius:50px; font-size:10px;">1</span>
-        <span>LIVE CONSOLE</span>
-    </div>
-    <button onclick="endCall()" style="background:none; border:none; color:#fff; font-weight:900; cursor:pointer; font-size:16px;">✕</button>
+    <div style="display:flex; align-items:center; gap:8px;"><span id="memberBadge" style="background:#000; color:#fff; padding:2px 8px; border-radius:50px; font-size:10px;">1</span><span>LIVE CONSOLE</span></div>
+    <button onclick="endCall()" style="background:none; border:none; color:#fff; font-weight:900; cursor:pointer;">✕</button>
   </div>
   <video id="remoteVideo" style="width:100%; display:block; background:#111;" autoplay playsinline></video>
-  <video id="localVideo" style="width:30%; position:absolute; bottom:65px; right:15px; border:3px solid #fff; border-radius:12px; box-shadow:0 10px 20px rgba(0,0,0,0.5);" autoplay playsinline muted></video>
-  <div style="padding:15px; background:var(--bg3); display:flex; justify-content:space-between; align-items:center; border-top:3px solid #000;">
+  <video id="localVideo" style="width:30%; position:absolute; bottom:65px; right:15px; border:3px solid #fff; border-radius:12px;" autoplay playsinline muted></video>
+  <div style="padding:15px; background:var(--bg3); display:flex; justify-content:space-between; border-top:3px solid #000;">
     <div style="display:flex; gap:8px;">
-        <button class="btn-icon-brutal" onclick="toggleMic()" style="width:40px; height:40px; font-size:16px;">🎤</button>
-        <button class="btn-icon-brutal" onclick="toggleCam()" style="width:40px; height:40px; font-size:16px;">📷</button>
+        <button class="btn-icon-brutal" onclick="toggleMic()" style="width:40px; height:40px;">🎤</button>
+        <button class="btn-icon-brutal" onclick="toggleCam()" style="width:40px; height:40px;">📷</button>
     </div>
-    <button class="btn-brutal" onclick="copyShareLink()" style="padding:8px 15px; font-size:12px; background:var(--cyan); color:#000;">
-        🔗 <span>INVITE</span>
-    </button>
+    <button class="btn-brutal" onclick="copyShareLink()" style="padding:8px 15px; font-size:12px; background:var(--cyan); color:#000;">🔗 <span>INVITE</span></button>
   </div>
 </div>
 
-<div id="toast" style="position:fixed; bottom:40px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:18px 35px; border-radius:50px; font-weight:900; border:4px solid var(--p); display:none; z-index:10000; box-shadow:0 15px 40px rgba(0,0,0,0.6);"></div>
+<div id="toast" style="position:fixed; bottom:40px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:18px 35px; border-radius:50px; font-weight:900; border:4px solid var(--p); display:none; z-index:10000;"></div>
 
 <script>
 const API = 'https://beastvault-backend.onrender.com/api';
 const socket = io(API.replace('/api', ''));
 let allVideos = [], currentRoom = null, currentVideoId = null;
 
-/* ══ NAVIGATION ══ */
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sbar-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   document.getElementById('btn-' + id)?.classList.add('active');
   if (id === 'home') fetchVideos();
+  if (id === 'yt-hub') fetchYTTrending();
   window.scrollTo(0,0);
 }
 
-/* ══ VIDEO ENGINE ══ */
 async function fetchVideos() {
   const r = await fetch(API + '/videos');
   const d = await r.json();
   allVideos = d.videos || [];
-  const publicVids = allVideos.filter(v => v.is_private !== true);
-  renderGrid(publicVids);
+  renderGrid(allVideos.filter(v => v.is_private !== true));
 }
 
 function renderGrid(vids) {
   const g = document.getElementById('mainGrid');
-  if(!vids.length) { g.innerHTML = "<p style='grid-column:1/-1; text-align:center; padding:50px;'>THE VAULT IS EMPTY...</p>"; return; }
-  g.innerHTML = vids.map(v => `
-    <div class="vcard" onclick="openPlayer('${v.id}')">
-      <div class="vcard-thumb"><img src="${v.thumbnail_url || ''}" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="vcard-body">
-        <div class="vcard-title">${v.title}</div>
-        <div style="font-size:12px; font-weight:800; color:var(--t3);">PRODUCER: @${v.uploader || 'beast'}</div>
-      </div>
-    </div>`).join('');
+  if(!vids.length) { g.innerHTML = "<p style='grid-column:1/-1; text-align:center; padding:50px;'>VAULT IS EMPTY...</p>"; return; }
+  g.innerHTML = vids.map(v => `<div class="vcard" onclick="openPlayer('${v.id}')"><div class="vcard-thumb"><img src="${v.thumbnail_url || ''}" style="width:100%; height:100%; object-fit:cover;"></div><div class="vcard-body"><div class="vcard-title">${v.title}</div><div style="font-size:12px; font-weight:800; color:var(--t3);">@${v.uploader || 'beast'}</div></div></div>`).join('');
 }
 
 async function openPlayer(id) {
   const v = allVideos.find(x => x.id == id);
-  if (!v) return;
-  currentVideoId = id;
-  showPage('player');
+  if (!v) {
+      try { const resp = await fetch(`${API}/videos/${id}`); const data = await resp.json(); if (data.video) { allVideos.push(data.video); return openPlayer(id); } } catch(e) { return; }
+  }
+  currentVideoId = id; showPage('player');
   document.getElementById('vTitle').textContent = v.title;
   document.getElementById('vUploader').textContent = `@${v.uploader || 'beast'}`;
-  const vid = document.getElementById('playerVideo');
-  vid.src = v.hls_url;
-  vid.play();
+  const vid = document.getElementById('playerVideo'); vid.src = v.hls_url; vid.play();
 }
 
-/* ══ EXPORT PDF LOGIC ══ */
 function exportThoughtsAsPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const { jsPDF } = window.jspdf; const doc = new jsPDF();
     const content = document.getElementById('thoughtArea').value;
-    const videoTitle = document.getElementById('vTitle').textContent;
-    const timestamp = new Date().toLocaleString();
-
-    if(!content.trim()) return showToast("⚠️ NO NOTES TO EXPORT");
-
-    // PDF Styling
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("BEASTVAULT SESSION NOTES", 20, 20);
-    
-    doc.setFontSize(12);
-    doc.setTextColor(100);
-    doc.text(`Video: ${videoTitle}`, 20, 30);
-    doc.text(`Exported on: ${timestamp}`, 20, 37);
-    
-    doc.setLineWidth(0.5);
-    doc.line(20, 42, 190, 42);
-    
-    doc.setFont("courier", "normal");
-    doc.setTextColor(0);
-    doc.setFontSize(11);
-    
-    // Auto-wrap text
-    const splitText = doc.splitTextToSize(content, 170);
-    doc.text(splitText, 20, 52);
-    
-    doc.save(`BeastVault_Notes_${videoTitle.replace(/\s+/g, '_')}.pdf`);
-    showToast("📄 PDF EXPORTED SUCCESSFULLY!");
+    if(!content.trim()) return showToast("⚠️ NO NOTES FOUND");
+    doc.setFont("helvetica", "bold"); doc.text("BEASTVAULT SESSION NOTES", 20, 20);
+    doc.setFontSize(10); doc.text(`Video: ${document.getElementById('vTitle').textContent}`, 20, 30);
+    doc.text(`Date: ${new Date().toLocaleString()}`, 20, 35);
+    doc.setFont("courier", "normal"); doc.text(doc.splitTextToSize(content, 170), 20, 50);
+    doc.save(`BeastVault_Notes.pdf`); showToast("📄 PDF EXPORTED!");
 }
 
-/* ══ REMAINING ENGINE LOGIC (SYNC, UPLOAD, ETC) ══ */
-// Thought area listener, Socket events, and other logic as per previous master...
-// ...
+async function searchYouTube() {
+  const q = document.getElementById('ytSearchInput').value;
+  const r = await fetch(`${API}/youtube/search?q=${encodeURIComponent(q)}`);
+  const d = await r.json(); renderYTGrid(d.videos);
+}
+
+async function fetchYTTrending() {
+  try { const r = await fetch(API + '/youtube/trending'); const d = await r.json(); if(d.videos) renderYTGrid(d.videos); } catch(e) {}
+}
+
+function renderYTGrid(vids) {
+  const g = document.getElementById('ytGrid');
+  g.innerHTML = vids.map(v => `<div class="vcard" onclick="showToast('Loading Player...')"><div class="vcard-thumb"><img src="${v.thumbnail}" style="width:100%;"></div><div class="vcard-body"><div class="vcard-title">${v.title}</div><div style="font-size:11px; font-weight:800; color:var(--yt-red);">${v.channel}</div></div></div>`).join('');
+}
+
+function copyShareLink() {
+  if (!currentVideoId) return;
+  const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}${currentRoom ? '&room='+currentRoom : ''}`;
+  navigator.clipboard.writeText(link); showToast("🔗 LINK COPIED!");
+}
+
+async function publishVideo() {
+  const fd = new FormData();
+  fd.append('video', document.getElementById('fileInput').files[0]);
+  fd.append('title', document.getElementById('upTitle').value);
+  fd.append('is_private', document.getElementById('upPrivate').checked);
+  const btn = document.getElementById('publishBtn'); btn.innerHTML = "⏳ UPLOADING...";
+  try { const r = await fetch(API + '/videos/upload', { method: 'POST', body: fd }); if(r.ok) { showToast("🦁 UNLEASHED!"); showPage('home'); } } catch(e) { showToast("❌ FAILED"); }
+  finally { btn.innerHTML = "📦 PUBLISH TO VAULT"; }
+}
+
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await fetchVideos();
+  const urlParams = new URLSearchParams(window.location.search);
+  const videoId = urlParams.get('video'), roomId = urlParams.get('room');
+  if (videoId) { await openPlayer(videoId); if (roomId) { currentRoom = roomId; socket.emit('join-room', currentRoom); document.getElementById('webcamContainer').style.display = 'block'; } }
+});
 </script>
 </body>
 </html>
