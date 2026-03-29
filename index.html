@@ -1,22 +1,3 @@
-Here is the Ultimate Cinematic Upgrade perfectly integrated into your file.
-
-I took your index.html and stripped out the boring default web player. I replaced it with a massive, Netflix-style custom player for your Vault videos.
-
-Here is what was upgraded:
-
-Desktop Cinematic View: The player now takes up a massive portion of the screen with a beautiful glowing shadow.
-
-Mobile Optimized: On phones, the player goes edge-to-edge perfectly. The controls are touch-friendly, and the volume slider hides so you have more room for the play buttons.
-
-10-Second Skip: Added custom forward/backward buttons.
-
-Auto-Hiding UI: Just like Netflix, the controls fade out when you stop moving your mouse or stop touching the screen.
-
-Hover Scrubber: The timeline glows and expands when you hover over it to skip through the video.
-
-Copy this entire block and replace your index.html file!
-
-HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -221,7 +202,7 @@ input, textarea, select { font-family: inherit; }
 /* ═══ CUSTOM CINEMATIC PLAYER ═══ */
 .player-wrap { padding: 32px 24px 80px; width: 100%; display: flex; flex-direction: column; align-items: center; }
 .player-shell {
-  width: 100%; max-width: 1300px; /* Massive 3:4/widescreen cinematic size */
+  width: 100%; max-width: 1300px;
   aspect-ratio: 16/9;
   position: relative;
   border-radius: var(--r-xl);
@@ -241,7 +222,6 @@ input, textarea, select { font-family: inherit; }
   display: flex; flex-direction: column; gap: 12px;
   z-index: 10;
 }
-/* Show controls on hover, or when 'active' class is added via touch */
 .player-shell:hover .custom-controls, .custom-controls.active { opacity: 1; }
 
 /* Progress Bar */
@@ -773,9 +753,9 @@ input, textarea, select { font-family: inherit; }
 </main>
 
 <div id="ytModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-  <div style="width:100%; max-width:1000px; aspect-ratio:16/9; position:relative;">
-      <button onclick="closeYTPlayer()" style="position:absolute; top:-40px; right:0; background:none; border:none; color:white; font-size:24px; cursor:pointer; transition: color 0.2s;">✕</button>
-      <iframe id="ytFrame" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px; box-shadow: 0 0 50px rgba(255,0,0,0.25);"></iframe>
+  <div style="width:100%; max-width:1300px; aspect-ratio:16/9; position:relative; border-radius: 32px; overflow: hidden; box-shadow: 0 0 80px rgba(225,29,72,0.15), 0 32px 80px rgba(0,0,0,0.8); border: 1px solid rgba(225,29,72,0.35); background: #000;">
+      <button onclick="closeYTPlayer()" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:40px; height:40px; color:white; font-size:20px; cursor:pointer; transition: all 0.2s; z-index: 1000; display:flex; align-items:center; justify-content:center;">✕</button>
+      <iframe id="ytFrame" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;"></iframe>
   </div>
 </div>
 
