@@ -10,6 +10,7 @@
 <title>BeastVault</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 <style>
 :root {
   --p:#e11d48;--p-light:#f43f5e;--p-glow:#fb7185;--p-dim:rgba(225,29,72,0.12);
@@ -311,7 +312,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 <div class="bg-mesh"></div>
 <div class="top-stripe"></div>
 
-<!-- AUTH MODAL -->
 <div class="modal-overlay" id="authModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeAuthModal()">✕</button>
@@ -340,7 +340,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   </div>
 </div>
 
-<!-- TOP NAV -->
 <nav class="topnav">
   <div class="topnav-logo" onclick="showPage('home')">BEAST<span>▸</span>VAULT</div>
   <div class="topnav-search">
@@ -358,7 +357,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   </div>
 </nav>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sbar-item active" id="sbar-home" onclick="showPage('home')">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -386,7 +384,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
 <main class="main">
 
-  <!-- HOME -->
   <div id="page-home" class="page active">
     <div class="home-wrap">
       <div class="cat-scroll">
@@ -407,7 +404,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
     </div>
   </div>
 
-  <!-- PLAYER -->
   <div id="page-player" class="page">
     <div class="player-wrap">
       <div class="player-shell" id="videoContainer">
@@ -444,7 +440,10 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
       <div class="player-info-card">
         <div class="player-top-row">
           <h1 class="player-title" id="vTitle">Video Title</h1>
-          <button class="btn-purge" id="purgeBtn">✕ Purge</button>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button id="liveReviewBtn" onclick="startLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Sync</button>
+            <button class="btn-purge" id="purgeBtn">✕ Purge</button>
+          </div>
         </div>
         <div class="player-stats">
           <div class="stat-chip views">
@@ -461,7 +460,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
         <div class="player-desc" id="vDesc">No description provided.</div>
       </div>
 
-      <!-- COMMENTS -->
       <div class="comments-section">
         <div class="comments-title">Comments <span id="commentCount">0</span></div>
         <div class="comment-form">
@@ -478,7 +476,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
     </div>
   </div>
 
-  <!-- UPLOAD -->
   <div id="page-upload" class="page">
     <div class="upload-wrap">
       <div class="upload-hero">
@@ -523,7 +520,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
     </div>
   </div>
 
-  <!-- YOUTUBE EXPLORER -->
   <div id="page-yt-hub" class="page">
     <div class="yt-wrap" style="max-width:100%;">
       <div class="yt-hero"><h1>YouTube <em>Explorer</em></h1><p>Browse trending or search the entire YouTube library.</p></div>
@@ -540,7 +536,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
     </div>
   </div>
 
-  <!-- YOUTUBE SHORTS PUBLISH -->
   <div id="page-youtube" class="page">
     <div class="yt-wrap">
       <div class="yt-hero"><h1>Push to <em>YouTube Shorts</em></h1><p>Select a video from your vault and stream it directly to YouTube.</p></div>
@@ -600,7 +595,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
 </main>
 
-<!-- YT EMBED MODAL -->
 <div id="ytModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;align-items:center;justify-content:center;padding:16px;">
   <div style="width:100%;max-width:1200px;aspect-ratio:16/9;position:relative;border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(225,29,72,0.15);border:1px solid rgba(225,29,72,0.35);background:#000;">
     <button onclick="closeYTPlayer()" style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:44px;height:44px;color:white;font-size:20px;cursor:pointer;z-index:1000;display:flex;align-items:center;justify-content:center;">✕</button>
@@ -608,7 +602,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   </div>
 </div>
 
-<!-- MOBILE NAV -->
 <nav class="mob-nav">
   <div class="mob-nav-inner">
     <button class="mob-nav-btn active" id="mob-home" onclick="showPage('home')">
@@ -745,7 +738,6 @@ function updateAuthUI() {
   }
 }
 
-/* ── Focus to show submit btn ── */
 document.addEventListener('DOMContentLoaded', () => {
   const ci = document.getElementById('commentInput');
   if (ci) {
@@ -876,8 +868,7 @@ async function openPlayer(id) {
   document.getElementById('purgeBtn').onclick = () => deleteVideo(v.id);
   const chip = document.getElementById('vCatChip');
   chip.textContent = v.category || ''; chip.style.display = v.category ? '' : 'none';
-  const vid = document.getElementById('playerVideo');
-  const playIcon = document.getElementById('playIcon');
+  
   if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
   if (!v.hls_url) return;
   if (v.hls_url.includes('.m3u8') && Hls.isSupported()) {
@@ -1186,10 +1177,90 @@ async function publishToYouTube() {
   finally { btn.textContent = '▶ PUBLISH TO YOUTUBE SHORTS'; btn.disabled = false; }
 }
 
+/* ═══════════════════════════════════════════════
+   REAL-TIME SYNC ENGINE (Figma for Video)
+═══════════════════════════════════════════════ */
+const socket = io(API.replace('/api', '')); // Connect to Render WebSocket
+let currentRoom = null;
+let isRemoteAction = false; // Prevents infinite loops!
+
+// 1. Generate Link & Join Room
+function startLiveReview() {
+  if (!currentVideoId) return;
+  currentRoom = Math.random().toString(36).substring(2, 9); // Generate random room code
+  const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}&room=${currentRoom}`;
+  
+  navigator.clipboard.writeText(link);
+  showToast('🔗 Invite Link Copied! Send it to your client.');
+  
+  socket.emit('join-room', currentRoom);
+  const btn = document.getElementById('liveReviewBtn');
+  if(btn) btn.innerHTML = '🟢 Room Active';
+}
+
+// 2. Listen for Client Joining
+socket.on('user-joined', () => {
+  showToast('👀 Client has joined the room!');
+});
+
+// 3. Broadcast OUR actions to the Client
+vid.addEventListener('play', () => {
+  if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', time: vid.currentTime });
+});
+vid.addEventListener('pause', () => {
+  if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', time: vid.currentTime });
+});
+vid.addEventListener('seeked', () => {
+  if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', time: vid.currentTime });
+});
+
+// 4. React to CLIENT'S actions
+socket.on('video-action', (data) => {
+  isRemoteAction = true; // Tell our player "Don't broadcast this, the client did it!"
+  
+  if (data.action === 'play') {
+    vid.currentTime = data.time;
+    vid.play();
+    playIcon.setAttribute('d', SVG_PAUSE);
+    showToast('▶ Client hit Play');
+  } else if (data.action === 'pause') {
+    vid.currentTime = data.time;
+    vid.pause();
+    playIcon.setAttribute('d', SVG_PLAY);
+    showToast('⏸ Client hit Pause');
+  } else if (data.action === 'seek') {
+    vid.currentTime = data.time;
+  }
+  
+  // Reset safety flag
+  setTimeout(() => { isRemoteAction = false; }, 150);
+});
+
+
 /* ══ BOOT ══ */
 const savedUser = localStorage.getItem('bv-user');
 if (savedUser) { try { currentUser = JSON.parse(savedUser); updateAuthUI(); } catch(e) {} }
-fetchVideos();
+
+// Auto-join shared room logic
+const urlParams = new URLSearchParams(window.location.search);
+const sharedRoom = urlParams.get('room');
+const sharedVideo = urlParams.get('video');
+
+async function boot() {
+  await fetchVideos(); // Ensure videos are loaded first
+
+  if (sharedRoom && sharedVideo) {
+    currentRoom = sharedRoom;
+    socket.emit('join-room', currentRoom);
+    openPlayer(sharedVideo);
+    const btn = document.getElementById('liveReviewBtn');
+    if(btn) btn.innerHTML = '🟢 Room Active';
+    showToast('Joined Live Review Room!');
+    window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
+  }
+}
+
+boot();
 </script>
 </body>
 </html>

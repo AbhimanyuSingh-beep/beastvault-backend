@@ -70,7 +70,11 @@ io.on('connection', (socket) => {
     // Tell everyone else in the room that someone arrived
     socket.to(roomId).emit('user-joined', socket.id);
   });
-
+  // NEW: Relay play/pause/seek commands to the other person in the room
+  socket.on('video-action', (data) => {
+    // Sends the command to everyone in the room EXCEPT the person who clicked it
+    socket.to(data.room).emit('video-action', data);
+  });
   socket.on('disconnect', () => {
     console.log('❌ User disconnected:', socket.id);
   });
