@@ -925,23 +925,23 @@ input, textarea, select { font-family: inherit; }
 
 <div class="toast" id="toast"></div>
 
+
 <script>
 const API = 'https://beastvault-backend.onrender.com/api';
 const socket = io(API.replace('/api', ''));
 let allVideos = [], hlsInst = null, currentTheme = 'dark';
 let currentRoom = null, currentVideoId = null;
 
-/* ══ UTILITY FUNCTIONS (RESTORED) ══ */
+/* ══ UTILITY FUNCTIONS ══ */
 function fd(s){if(!s)return'';const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0');}
 function fn(n){if(!n)return'0';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(n);}
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* ══ THEME TOGGLER (RESTORED) ══ */
+/* ══ THEME TOGGLER ══ */
 function toggleTheme() {
   currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
   applyTheme(currentTheme);
@@ -974,53 +974,38 @@ applyTheme(localStorage.getItem('bv-theme') || 'dark');
 /* ══ MOBILE DRAG ENGINE FOR WEBCAM ══ */
 const camBox = document.getElementById('webcamContainer');
 let isDragging = false, dragX, dragY;
-
 function startDrag(e) {
   if (e.target.tagName === 'SPAN') return;
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  isDragging = true;
-  dragX = clientX - camBox.offsetLeft;
-  dragY = clientY - camBox.offsetTop;
+  isDragging = true; dragX = clientX - camBox.offsetLeft; dragY = clientY - camBox.offsetTop;
 }
 function moveDrag(e) {
   if (!isDragging) return;
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  camBox.style.left = (clientX - dragX) + 'px';
-  camBox.style.top = (clientY - dragY) + 'px';
-  camBox.style.right = 'auto'; 
-  camBox.style.bottom = 'auto';
+  camBox.style.left = (clientX - dragX) + 'px'; camBox.style.top = (clientY - dragY) + 'px';
+  camBox.style.right = 'auto'; camBox.style.bottom = 'auto';
 }
-camBox.addEventListener('mousedown', startDrag);
-camBox.addEventListener('touchstart', startDrag, {passive: true});
-document.addEventListener('mousemove', moveDrag);
-document.addEventListener('touchmove', moveDrag, {passive: true});
-document.addEventListener('mouseup', () => isDragging = false);
-document.addEventListener('touchend', () => isDragging = false);
+camBox.addEventListener('mousedown', startDrag); camBox.addEventListener('touchstart', startDrag, {passive: true});
+document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, {passive: true});
+document.addEventListener('mouseup', () => isDragging = false); document.addEventListener('touchend', () => isDragging = false);
 
 /* ══ NAVIGATION ══ */
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sbar-item').forEach(i => i.classList.remove('active'));
   document.querySelectorAll('.mob-nav-btn').forEach(i => i.classList.remove('active'));
-  
   document.getElementById('page-' + id).classList.add('active');
-  const sbar = document.getElementById('sbar-' + id);
-  if(sbar) sbar.classList.add('active');
+  const sbar = document.getElementById('sbar-' + id); if(sbar) sbar.classList.add('active');
   
   if (id === 'home') fetchVideos();
   if (id === 'yt-hub') fetchYTTrending();
-  if (id === 'youtube') {
-    populateYTVideoSelect();
-    checkYTAuth();
-  }
+  if (id === 'youtube') { populateYTVideoSelect(); checkYTAuth(); }
   
   if (id !== 'player') {
-    const v = document.getElementById('playerVideo');
-    if (v) { v.pause(); v.src = ''; }
-    const yt = document.getElementById('ytIframe');
-    if(yt) { yt.src = ''; }
+    const v = document.getElementById('playerVideo'); if (v) { v.pause(); v.src = ''; }
+    const yt = document.getElementById('ytIframe'); if(yt) { yt.src = ''; }
     if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1034,39 +1019,21 @@ async function fetchVideos() {
     allVideos = d.videos || [];
     renderGrid(allVideos.filter(v => !v.is_private));
     updateStats();
-  } catch(e) {
-    document.getElementById('mainGrid').innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">⚠️</div>
-        <div class="empty-text">Vault offline</div>
-        <div class="empty-sub">Backend waking up — refresh in 30s</div>
-      </div>`;
-  }
+  } catch(e) { document.getElementById('mainGrid').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Vault offline</div></div>`; }
 }
 
 function updateStats() {
   const total = allVideos.length;
   const views = allVideos.reduce((a,v) => a + (parseInt(v.views)||0), 0);
-  const el1 = document.getElementById('statTotal');
-  const el2 = document.getElementById('statViews');
-  if (el1) el1.textContent = total;
-  if (el2) el2.textContent = fn(views);
+  if (document.getElementById('statTotal')) document.getElementById('statTotal').textContent = total;
+  if (document.getElementById('statViews')) document.getElementById('statViews').textContent = fn(views);
 }
 
 function renderGrid(vids) {
   const g = document.getElementById('mainGrid');
   const cnt = document.getElementById('videoCount');
   if (cnt) cnt.textContent = vids.length + ' videos';
-
-  if (!vids.length) {
-    g.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">🎬</div>
-        <div class="empty-text">Vault is empty</div>
-        <div class="empty-sub">Hit ⚡ Unleash to add your first video</div>
-      </div>`;
-    return;
-  }
+  if (!vids.length) { g.innerHTML = `<div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Vault is empty</div></div>`; return; }
 
   g.innerHTML = vids.map(v => `
     <div class="vcard" onclick="openPlayer('${v.id}')">
@@ -1079,14 +1046,8 @@ function renderGrid(vids) {
       <div class="vcard-body">
         <div class="vcard-title">${v.title}</div>
         <div class="vcard-meta">
-          <div class="vcard-views">
-            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/>
-            </svg>
-            ${fn(v.views||0)}
-          </div>
-          <span style="color:var(--t4)">•</span>
-          <span>${v.uploader||'beast'}</span>
+          <div class="vcard-views"><svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/></svg>${fn(v.views||0)}</div>
+          <span style="color:var(--t4)">•</span><span>${v.uploader||'beast'}</span>
           ${v.category ? `<div class="vcard-cat">${v.category}</div>` : ''}
         </div>
       </div>
@@ -1095,8 +1056,7 @@ function renderGrid(vids) {
 
 function filterCat(cat, el) {
   document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-  if (el) el.classList.add('active');
-  showPage('home');
+  if (el) el.classList.add('active'); showPage('home');
   const filtered = cat ? allVideos.filter(v => !v.is_private && v.category === cat) : allVideos.filter(v => !v.is_private);
   setTimeout(() => renderGrid(filtered), 50);
 }
@@ -1106,28 +1066,16 @@ document.getElementById('searchInput').oninput = e => {
   renderGrid(q ? allVideos.filter(v => !v.is_private && v.title.toLowerCase().includes(q)) : allVideos.filter(v => !v.is_private));
 };
 
-async function recView(id) {
-  try { await fetch(API + '/videos/' + id + '/view', { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } }); } catch(e) {}
-}
+async function recView(id) { try { await fetch(API + '/videos/' + id + '/view', { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } }); } catch(e) {} }
 
 async function openPlayer(id) {
   const v = allVideos.find(x => x.id === id);
-  if (!v) { 
-    try { 
-      const resp = await fetch(API + '/videos/' + id); 
-      const data = await resp.json(); 
-      if(data.video) { allVideos.push(data.video); return openPlayer(id); } 
-    } catch(e) { return; } 
-  }
+  if (!v) { try { const resp = await fetch(API + '/videos/' + id); const data = await resp.json(); if(data.video) { allVideos.push(data.video); return openPlayer(id); } } catch(e) { return; } }
   
-  currentVideoId = id; 
-  showPage('player');
-  recView(id);
+  currentVideoId = id; showPage('player'); recView(id);
   
-  document.getElementById('ytIframe').style.display = 'none';
-  document.getElementById('ytIframe').src = '';
-  const vid = document.getElementById('playerVideo');
-  vid.style.display = 'block';
+  document.getElementById('ytIframe').style.display = 'none'; document.getElementById('ytIframe').src = '';
+  const vid = document.getElementById('playerVideo'); vid.style.display = 'block';
 
   document.getElementById('vTitle').textContent = v.title;
   document.getElementById('vUploader').textContent = `@${v.uploader || 'beast'}`;
@@ -1139,138 +1087,72 @@ async function openPlayer(id) {
   if (!v.hls_url) return;
 
   if (v.hls_url.includes('.m3u8') && Hls.isSupported()) {
-    hlsInst = new Hls();
-    hlsInst.loadSource(v.hls_url);
-    hlsInst.attachMedia(vid);
-    hlsInst.on(Hls.Events.MANIFEST_PARSED, () => vid.play());
-  } else {
-    vid.src = v.hls_url;
-    vid.load();
-    vid.play().catch(()=>{});
-  }
+    hlsInst = new Hls(); hlsInst.loadSource(v.hls_url); hlsInst.attachMedia(vid); hlsInst.on(Hls.Events.MANIFEST_PARSED, () => vid.play());
+  } else { vid.src = v.hls_url; vid.load(); vid.play().catch(()=>{}); }
 }
 
-/* ══ YOUTUBE EXPLORER (RESTORED) ══ */
-async function fetchYTTrending() {
-  try {
-    const r = await fetch(API + '/youtube/trending');
-    const d = await r.json();
-    if(d.videos) renderYTGrid(d.videos);
-  } catch(e) {}
-}
-
+/* ══ YOUTUBE EXPLORER ══ */
+async function fetchYTTrending() { try { const r = await fetch(API + '/youtube/trending'); const d = await r.json(); if(d.videos) renderYTGrid(d.videos); } catch(e) {} }
 async function searchYouTube() {
-  const q = document.getElementById('ytSearchInput').value;
-  if(!q) return;
-  try {
-    const r = await fetch(`${API}/youtube/search?q=${encodeURIComponent(q)}`);
-    const d = await r.json();
-    renderYTGrid(d.videos);
-  } catch(e) { showToast("❌ Search failed"); }
+  const q = document.getElementById('ytSearchInput').value; if(!q) return;
+  try { const r = await fetch(`${API}/youtube/search?q=${encodeURIComponent(q)}`); const d = await r.json(); renderYTGrid(d.videos); } catch(e) { showToast("❌ Search failed"); }
 }
-
 function renderYTGrid(vids) {
   const g = document.getElementById('ytGrid');
   g.innerHTML = vids.map(v => `
     <div class="vcard" onclick="playYT('${v.id || v.videoId}')">
-      <div class="vcard-thumb">
-        <div class="vcard-overlay"></div>
-        <img src="${v.thumbnail}">
-        <div class="vcard-play"><div class="play-ring" style="background:var(--yt-red);">▶</div></div>
-      </div>
-      <div class="vcard-body">
-        <div class="vcard-title">${v.title}</div>
-        <div style="font-size: 11px; color: var(--yt-red); margin-top: 5px; font-weight: 800;">${v.channel}</div>
-      </div>
+      <div class="vcard-thumb"><div class="vcard-overlay"></div><img src="${v.thumbnail}"><div class="vcard-play"><div class="play-ring" style="background:var(--yt-red);">▶</div></div></div>
+      <div class="vcard-body"><div class="vcard-title">${v.title}</div><div style="font-size: 11px; color: var(--yt-red); margin-top: 5px; font-weight: 800;">${v.channel}</div></div>
     </div>`).join('');
 }
-
 function playYT(videoId) {
   showPage('player');
-  
-  const localVid = document.getElementById('playerVideo');
-  localVid.style.display = 'none';
-  localVid.pause();
-  
-  const ytIframe = document.getElementById('ytIframe');
-  ytIframe.style.display = 'block';
+  const localVid = document.getElementById('playerVideo'); localVid.style.display = 'none'; localVid.pause();
+  const ytIframe = document.getElementById('ytIframe'); ytIframe.style.display = 'block';
   ytIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-  
-  document.getElementById('vTitle').textContent = "YouTube Explore Mode";
-  document.getElementById('vUploader').textContent = "YouTube Engine";
+  document.getElementById('vTitle').textContent = "YouTube Explore Mode"; document.getElementById('vUploader').textContent = "YouTube Engine";
   currentVideoId = videoId;
 }
 
-/* ══ YOUTUBE PUBLISHER (RESTORED FULLY) ══ */
-function connectYouTube() {
-  window.location.href = API + '/youtube/auth';
-}
-
+/* ══ YOUTUBE PUBLISHER ══ */
+function connectYouTube() { window.location.href = API + '/youtube/auth'; }
 function checkYTAuth() {
   const ytStatus = document.getElementById('ytStatusText');
-  if(localStorage.getItem('yt_connected') === 'true') {
-    ytStatus.textContent = '🟢 Connected';
-    ytStatus.style.color = 'var(--green)';
-  } else {
-    ytStatus.textContent = '🔴 Not Connected';
-    ytStatus.style.color = 'var(--red)';
-  }
+  if(localStorage.getItem('yt_connected') === 'true') { ytStatus.textContent = '🟢 Connected'; ytStatus.style.color = 'var(--green)'; } 
+  else { ytStatus.textContent = '🔴 Not Connected'; ytStatus.style.color = 'var(--red)'; }
 }
-
 function populateYTVideoSelect() { 
   const s = document.getElementById('ytVideoSelect');
   s.innerHTML = allVideos.map(v => `<option value="${v.hls_url}" data-title="${v.title}" data-desc="${v.description||''}">${v.title}</option>`).join('');
 }
-
 function autoFillYTFields() {
   const select = document.getElementById('ytVideoSelect');
   if(select.options.length > 0) {
     const opt = select.options[select.selectedIndex];
-    document.getElementById('ytTitle').value = opt.dataset.title || '';
-    document.getElementById('ytDesc').value  = opt.dataset.desc  || '';
+    document.getElementById('ytTitle').value = opt.dataset.title || ''; document.getElementById('ytDesc').value  = opt.dataset.desc  || '';
   }
 }
-
 async function publishToYouTube() {
-  const videoUrl = document.getElementById('ytVideoSelect').value;
-  const title    = document.getElementById('ytTitle').value.trim();
-  const desc     = document.getElementById('ytDesc').value.trim();
-  const tags     = document.getElementById('ytTags').value.trim();
-  const ytPrivacy = document.getElementById('ytPrivacy').value;
+  const videoUrl = document.getElementById('ytVideoSelect').value; const title = document.getElementById('ytTitle').value.trim();
+  const desc = document.getElementById('ytDesc').value.trim(); const tags = document.getElementById('ytTags').value.trim(); const ytPrivacy = document.getElementById('ytPrivacy').value;
+  if (!videoUrl) return showToast('⚠️ Select a video'); if (!title) return showToast('⚠️ Enter a title');
 
-  if (!videoUrl) return showToast('⚠️ Select a video');
-  if (!title)    return showToast('⚠️ Enter a title');
-
-  const btn = document.getElementById('ytPublishBtn');
-  btn.textContent = '⏳ Uploading to YouTube...';
-  btn.disabled = true;
+  const btn = document.getElementById('ytPublishBtn'); btn.textContent = '⏳ Uploading to YouTube...'; btn.disabled = true;
 
   try {
-    const r = await fetch(API + '/youtube/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
-      body: JSON.stringify({ videoUrl, title, description: desc, tags, privacy: ytPrivacy })
-    });
+    const r = await fetch(API + '/youtube/upload', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' }, body: JSON.stringify({ videoUrl, title, description: desc, tags, privacy: ytPrivacy }) });
     const d = await r.json();
     if (r.ok && d.success) {
       showToast('▶ Live on YouTube Shorts!');
-      const card = document.getElementById('ytResultCard');
-      const link = document.getElementById('ytResultLink');
-      link.href = d.url;
-      link.textContent = d.url;
-      card.classList.add('show');
-    } else {
-      showToast('❌ ' + (d.error || 'Upload failed'));
-    }
-  } catch(e) {
-    showToast('❌ Connection error');
-  } finally {
-    btn.textContent = '▶ PUBLISH TO SHORTS';
-    btn.disabled = false;
-  }
+      const card = document.getElementById('ytResultCard'); const link = document.getElementById('ytResultLink');
+      link.href = d.url; link.textContent = d.url; card.classList.add('show');
+    } else showToast('❌ ' + (d.error || 'Upload failed'));
+  } catch(e) { showToast('❌ Connection error'); } finally { btn.textContent = '▶ PUBLISH TO SHORTS'; btn.disabled = false; }
 }
 
-/* ══ WEBRTC ENGINE FOR MOBILE PHONE VIDEO FIX ══ */
+/* ═══════════════════════════════════════════════
+   WEBRTC PEER-TO-PEER ENGINE (THE FIX!)
+═══════════════════════════════════════════════ */
 const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 let peerConnection;
 let localStream;
@@ -1278,16 +1160,19 @@ let localStream;
 async function initWebRTC() {
     peerConnection = new RTCPeerConnection(iceServers);
     
+    // Add our camera to the connection
     if (localStream) {
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
     }
 
+    // When the other person's camera arrives, play it in the big box
     peerConnection.ontrack = (event) => {
         const remoteVid = document.getElementById('remoteVideo');
         remoteVid.srcObject = event.streams[0];
         remoteVid.play().catch(e => console.log("Remote play error", e));
     };
 
+    // Find the best internet route to the other person
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
             socket.emit('webrtc-ice-candidate', { room: currentRoom, candidate: event.candidate });
@@ -1295,15 +1180,16 @@ async function initWebRTC() {
     };
 }
 
+// When a guest joins, the host creates the offer
 socket.on('user-joined', async (userId) => {
     if (!localStream) return; 
     await initWebRTC();
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
     socket.emit('webrtc-offer', { room: currentRoom, offer: offer });
-    showToast("📱 Peer connected. Establishing video...");
 });
 
+// The guest receives the offer and answers back
 socket.on('webrtc-offer', async (offer) => {
     await initWebRTC();
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
@@ -1313,52 +1199,24 @@ socket.on('webrtc-offer', async (offer) => {
 });
 
 socket.on('webrtc-answer', async (answer) => {
-    if (peerConnection) {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    }
+    if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
 });
 
 socket.on('webrtc-ice-candidate', async (candidate) => {
-    if (peerConnection) {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    }
+    if (peerConnection) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
 });
 
-/* ══ COLLAB BOARD SYNC (PRO) ══ */
+/* ══ COLLAB BOARD SYNC ══ */
 const thoughtArea = document.getElementById('thoughtArea');
 const indicator = document.getElementById('syncIndicator');
 
 thoughtArea.addEventListener('input', () => { 
-  if (currentRoom) {
-    socket.emit('sync-thoughts', { room: currentRoom, content: thoughtArea.value }); 
-    indicator.textContent = "SYNCING...";
-  }
+  if (currentRoom) { socket.emit('sync-thoughts', { room: currentRoom, content: thoughtArea.value }); indicator.textContent = "SYNCING..."; }
 });
-
-socket.on('sync-thoughts', (data) => { 
-  thoughtArea.value = data.content; 
-  indicator.textContent = "REMOTE UPDATED";
-  setTimeout(() => { indicator.textContent = "STATIONARY"; }, 1200);
-});
-
+socket.on('sync-thoughts', (data) => { thoughtArea.value = data.content; indicator.textContent = "REMOTE UPDATED"; setTimeout(() => { indicator.textContent = "STATIONARY"; }, 1200); });
 socket.on('room-metrics', (data) => { document.getElementById('memberBadge').textContent = data.members; });
-
-socket.on('request-room-state', (data) => {
-    if (currentRoom) {
-        const vid = document.getElementById('playerVideo');
-        socket.emit('send-room-state', {
-            to: data.requester,
-            state: { time: vid.currentTime, thought: thoughtArea.value, playing: !vid.paused }
-        });
-    }
-});
-
-socket.on('receive-room-state', (state) => {
-    const vid = document.getElementById('playerVideo');
-    if(vid) vid.currentTime = state.time;
-    thoughtArea.value = state.thought;
-    if (state.playing && vid) vid.play();
-});
+socket.on('request-room-state', (data) => { if (currentRoom) { const vid = document.getElementById('playerVideo'); socket.emit('send-room-state', { to: data.requester, state: { time: vid.currentTime, thought: thoughtArea.value, playing: !vid.paused } }); } });
+socket.on('receive-room-state', (state) => { const vid = document.getElementById('playerVideo'); if(vid) vid.currentTime = state.time; thoughtArea.value = state.thought; if (state.playing && vid) vid.play(); });
 
 function exportThoughtsAsPDF() {
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
@@ -1376,22 +1234,30 @@ function copyShareLink() {
 async function startVaultLiveReview() {
   if (!currentRoom) currentRoom = Math.random().toString(36).substring(7);
   document.getElementById('webcamContainer').style.display = 'block';
-  socket.emit('join-room', currentRoom); copyShareLink();
+  copyShareLink();
+  
+  // 1. Get Camera
   try { 
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
     const localVid = document.getElementById('localVideo');
     localVid.srcObject = localStream;
     localVid.play().catch(e=>console.log(e));
   } catch(e) { showToast("⚠️ Webcam access denied"); }
+  
+  // 2. Join room (this alerts other users we are ready to connect)
+  socket.emit('join-room', currentRoom); 
 }
 
-function endCall() { document.getElementById('webcamContainer').style.display = 'none'; }
+function endCall() { 
+  document.getElementById('webcamContainer').style.display = 'none'; 
+  if(localStream) localStream.getTracks().forEach(track => track.stop());
+  if(peerConnection) peerConnection.close();
+}
 
 /* ══ UPLOAD TO VAULT ENGINE ══ */
 function onFileChange(input) {
   const f = input.files[0]; if (!f) return;
-  const el = document.getElementById('dropFile');
-  el.textContent = `📹 ${f.name}`; el.style.display = 'inline-block';
+  const el = document.getElementById('dropFile'); el.textContent = `📹 ${f.name}`; el.style.display = 'inline-block';
 }
 
 const dz = document.getElementById('dropZone');
@@ -1411,8 +1277,7 @@ async function publishVideo() {
   
   const btn = document.getElementById('publishBtn'); btn.innerHTML = "⏳ UPLOADING...";
   const fd = new FormData(); 
-  fd.append('video', file); 
-  fd.append('title', title);
+  fd.append('video', file); fd.append('title', title);
   fd.append('description', document.getElementById('upDesc').value);
   fd.append('category', document.getElementById('upCat').value);
   fd.append('is_private', isPrivate);
@@ -1444,11 +1309,25 @@ window.addEventListener('DOMContentLoaded', async () => {
   
   if (v) { 
     await openPlayer(v); 
-    if(r) { currentRoom = r; socket.emit('join-room', r); socket.emit('request-room-state', { room: currentRoom }); document.getElementById('webcamContainer').style.display='block'; } 
-  } else if (yt) {
-    playYT(yt);
-  }
+    if(r) { 
+      currentRoom = r; 
+      document.getElementById('webcamContainer').style.display='block'; 
+      
+      // Guest asks for camera permission upon clicking the link
+      try { 
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
+        const localVid = document.getElementById('localVideo');
+        localVid.srcObject = localStream;
+        localVid.play().catch(e=>console.log(e));
+      } catch(e) { showToast("⚠️ Webcam access denied"); }
+
+      // Guest joins room, triggering the WebRTC connection
+      socket.emit('join-room', r); 
+      socket.emit('request-room-state', { room: currentRoom }); 
+    } 
+  } else if (yt) { playYT(yt); }
 });
+
 </script>
 </body>
 </html>
