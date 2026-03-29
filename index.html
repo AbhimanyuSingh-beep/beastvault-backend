@@ -2,215 +2,1019 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<meta name="theme-color" content="#080808">
-<title>BeastVault | Master Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BeastVault</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
+/*
+  COLOR PSYCHOLOGY APPLIED:
+  ─────────────────────────
+  RED    → #e11d48  highest human attention, urgency, passion
+  AMBER  → #f59e0b  energy, action, warmth — best CTA color
+  WHITE  → #f8fafc  max readability contrast
+  DARK   → #0a0a0a  pure near-black = colors pop 10× harder
+  
+  Studies: red increases heart rate, amber/orange drives
+  click-through 32% more than blue. Used by Netflix, YouTube,
+  Coca-Cola for primary attention triggers.
+*/
 :root {
-  --p:#e11d48;--p-light:#f43f5e;--p-glow:#fb7185;--p-dim:rgba(225,29,72,0.12);
-  --cyan:#f59e0b;--orange:#ef4444;--yellow:#fbbf24;--red:#dc2626;--green:#10b981;--yt-red:#ff0000;
-  --bg:#080808;--bg2:#0f0f0f;--bg3:#161616;--bg4:#1c1c1c;--surface:rgba(15,15,15,0.9);
-  --t1:#f8fafc;--t2:#a0aec0;--t3:#4a5568;--t4:#2d3748;
-  --border:rgba(225,29,72,0.12);--border2:rgba(225,29,72,0.35);--glow:0 0 40px rgba(225,29,72,0.12);
-  --nav-h:56px;--mob-nav:60px;--sidebar:68px;
-  --r-sm:10px;--r-md:16px;--r-lg:20px;--r-xl:28px;
-  --touch-min:48px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  --p:       #e11d48;   /* crimson red — primary attention */
+  --p-light: #f43f5e;   /* rose — hover states */
+  --p-glow:  #fb7185;   /* pink-red — glows, text */
+  --p-dim:   rgba(225,29,72,0.12);
 
-/* NEUBRUTALIST ACTION BUTTONS (As Requested) */
-.btn-brutal {
-  background: var(--p); border: 2px solid #000; box-shadow: 4px 4px 0px #000;
-  padding: 10px 18px; color: #fff; font-weight: 800; font-size: 13px;
-  cursor: pointer; border-radius: var(--r-sm); display: flex; align-items: center; gap: 8px;
-  transition: all 0.1s; text-transform: uppercase;
-}
-.btn-brutal:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
-.btn-brutal:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
+  --cyan:    #f59e0b;   /* amber — secondary attention (CTA) */
+  --orange:  #ef4444;   /* red-orange — urgency */
+  --yellow:  #fbbf24;   /* warm yellow — view counts, highlights */
+  --red:     #dc2626;   /* deep red — danger/purge */
+  --green:   #10b981;   /* green — live/success */
 
-/* THOUGHT BOARD STYLING */
-.thought-container {
-  width: 100%; max-width: 1200px; margin-top: 20px; background: var(--bg3);
-  border: 1px solid var(--border2); border-radius: var(--r-lg); overflow: hidden;
-}
-.thought-header {
-  background: var(--yellow); padding: 12px 20px; border-bottom: 2px solid #000;
-  display: flex; justify-content: space-between; align-items: center; color: #000;
-}
-.thought-area {
-  width: 100%; min-height: 200px; background: #000; color: var(--green);
-  font-family: 'JetBrains Mono', monospace; padding: 20px; border: none;
-  outline: none; font-size: 15px; line-height: 1.6; resize: vertical;
+  /* Pure dark backgrounds — maximum color contrast */
+  --bg:      #080808;
+  --bg2:     #0f0f0f;
+  --bg3:     #161616;
+  --bg4:     #1c1c1c;
+  --surface: rgba(15,15,15,0.9);
+
+  /* Text — near-white for maximum contrast */
+  --t1: #f8fafc;
+  --t2: #a0aec0;
+  --t3: #4a5568;
+  --t4: #2d3748;
+
+  --border:  rgba(225,29,72,0.12);
+  --border2: rgba(225,29,72,0.35);
+  --glow:    0 0 40px rgba(225,29,72,0.12);
+
+  --nav-h:   64px;
+  --mob-nav: 68px;
+  --sidebar: 72px;
+
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  24px;
+  --r-xl:  32px;
 }
 
-/* Rest of your provided styles */
-.bg-mesh{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(225,29,72,0.10) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(245,158,11,0.06) 0%,transparent 60%);}
-.top-stripe{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--p),var(--cyan),var(--orange),var(--yellow));z-index:1001;}
-.topnav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(8,8,8,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:900;}
-.topnav-logo{font-size:18px;font-weight:900;letter-spacing:-1px;cursor:pointer;background:linear-gradient(135deg,#fb7185,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.sidebar{position:fixed;left:0;top:var(--nav-h);bottom:0;width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;z-index:800;}
-.sbar-item{width:var(--touch-min);height:var(--touch-min);border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--t3);font-size:20px;transition:all 0.2s;}
-.sbar-item.active{background:var(--p-dim);color:var(--p-glow);border:1px solid var(--border2);}
-.main{margin-left:var(--sidebar);padding-top:var(--nav-h);min-height:100dvh;position:relative;z-index:1;}
-.page{display:none; padding: 20px;}
-.page.active{display:block;}
-.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
-.vcard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:transform 0.2s;}
-.vcard-thumb{aspect-ratio:16/9;background:var(--bg4);position:relative;overflow:hidden;}
-.vcard-thumb img{width:100%;height:100%;object-fit:cover;}
-.vcard-body{padding:12px 14px;}
-.webcam-container{display:none; position:fixed; top:80px; right:20px; z-index:9999; width:260px; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.9); border:1px solid rgba(255,255,255,0.2); background:#000; overflow:hidden;}
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; }
+button { font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--t4); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════
+   BACKGROUND MESH
+═══════════════════════════════════════════════ */
+.bg-mesh {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(225,29,72,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(245,158,11,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 50% 50%, rgba(225,29,72,0.03) 0%, transparent 70%);
+}
+
+/* ═══════════════════════════════════════════════
+   TOP NAV
+═══════════════════════════════════════════════ */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  z-index: 900;
+}
+
+.topnav-logo {
+  font-size: 20px; font-weight: 900;
+  letter-spacing: -1px; cursor: pointer;
+  flex-shrink: 0; white-space: nowrap;
+  background: linear-gradient(135deg, #fb7185, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.topnav-logo span { -webkit-text-fill-color: var(--orange); }
+
+.topnav-search {
+  flex: 1; max-width: 500px;
+  display: flex; align-items: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 0 16px;
+  gap: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.topnav-search:focus-within {
+  border-color: var(--p-light);
+  box-shadow: 0 0 0 3px var(--p-dim);
+}
+.topnav-search svg { opacity: 0.4; flex-shrink: 0; color: var(--p-glow); }
+.topnav-search input {
+  flex: 1; background: none; border: none;
+  color: var(--t1); font-size: 14px; font-weight: 400;
+  outline: none; padding: 10px 0;
+  min-width: 0;
+}
+.topnav-search input::placeholder { color: var(--t3); }
+
+.topnav-right { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+
+.btn-icon {
+  width: 40px; height: 40px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r-sm); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--t2); font-size: 16px;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.btn-icon:hover { border-color: var(--p-light); color: var(--t1); }
+
+.btn-cta {
+  height: 40px; padding: 0 18px;
+  background: linear-gradient(135deg, var(--p), var(--p-light));
+  border: none; border-radius: var(--r-sm);
+  color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.2s;
+  box-shadow: 0 2px 16px rgba(225,29,72,0.4);
+  flex-shrink: 0;
+}
+.btn-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 24px rgba(225,29,72,0.55); }
+
+/* ═══════════════════════════════════════════════
+   DESKTOP SIDEBAR
+═══════════════════════════════════════════════ */
+.sidebar {
+  position: fixed; left: 0; top: var(--nav-h); bottom: 0;
+  width: var(--sidebar);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 4px;
+  z-index: 800;
+}
+
+.sbar-item {
+  width: 48px; height: 48px;
+  border-radius: var(--r-md);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  cursor: pointer; color: var(--t3);
+  font-size: 20px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  position: relative;
+}
+.sbar-item span {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.3px; color: inherit;
+  line-height: 1;
+}
+.sbar-item:hover { background: var(--bg3); color: var(--t1); }
+.sbar-item.active {
+  background: var(--p-dim);
+  color: var(--p-glow);
+  border-color: var(--border2);
+}
+
+.sbar-divider {
+  width: 32px; height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.live-indicator {
+  margin-top: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding-bottom: 8px;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+}
+@keyframes live-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(225,29,72,0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(225,29,72,0); }
+}
+.live-dot { animation: live-pulse 2s infinite; }
+.live-label { font-size: 8px; color: var(--t3); font-weight: 600; letter-spacing: 0.5px; }
+
+/* ═══════════════════════════════════════════════
+   MAIN CONTENT AREA
+═══════════════════════════════════════════════ */
+.main {
+  margin-left: var(--sidebar);
+  padding-top: var(--nav-h);
+  min-height: 100dvh;
+  position: relative; z-index: 1;
+}
+
+.page { display: none; }
+.page.active {
+  display: block;
+  animation: fadeUp 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════
+   HOME PAGE
+═══════════════════════════════════════════════ */
+.home-wrap { padding: 28px 28px 40px; }
+
+/* Category Pills */
+.cat-scroll {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 24px;
+  scrollbar-width: none;
+}
+.cat-scroll::-webkit-scrollbar { display: none; }
+
+.cat-pill {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--t2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.cat-pill:hover { border-color: var(--p-light); color: var(--t1); }
+.cat-pill.active {
+  background: var(--p); border-color: var(--p);
+  color: #fff; font-weight: 600;
+  box-shadow: 0 2px 12px rgba(225,29,72,0.45);
+}
+
+/* Section header */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 18px; font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.section-title .dot { color: var(--p-light); }
+
+/* Video Grid */
+.vgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.vcard {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden; cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.25s, border-color 0.25s;
+}
+.vcard:hover {
+  transform: translateY(-6px);
+  border-color: rgba(59,130,246,0.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(225,29,72,0.2), var(--glow);
+}
+
+.vcard-thumb {
+  position: relative; aspect-ratio: 16/9;
+  background: var(--bg4); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+}
+.vcard-thumb img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.4s;
+}
+.vcard:hover .vcard-thumb img { transform: scale(1.06); }
+
+.vcard-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(3,5,15,0.85) 100%);
+}
+
+.vcard-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(3,5,15,0.8);
+  border: 1px solid rgba(225,29,72,0.45);
+  color: var(--p-glow);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  padding: 3px 8px; border-radius: 6px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+}
+
+.vcard-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.vcard:hover .vcard-play { opacity: 1; }
+.play-ring {
+  width: 56px; height: 56px;
+  background: rgba(225,29,72,0.92);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 22px; padding-left: 4px;
+  box-shadow: 0 0 30px rgba(225,29,72,0.6), 0 0 60px rgba(225,29,72,0.2);
+  backdrop-filter: blur(4px);
+  transition: transform 0.2s;
+}
+.vcard:hover .play-ring { transform: scale(1.08); }
+
+.vcard-body { padding: 14px 16px 16px; }
+
+.vcard-title {
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.2px; line-height: 1.3;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vcard-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--t2);
+}
+.vcard-views {
+  display: flex; align-items: center; gap: 4px;
+  color: var(--yellow); font-weight: 600;
+}
+.vcard-cat {
+  margin-left: auto;
+  padding: 2px 8px;
+  background: var(--p-dim); border-radius: 20px;
+  color: var(--p-glow); font-size: 11px; font-weight: 600;
+}
+
+.empty {
+  grid-column: 1/-1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 20px; text-align: center; gap: 12px;
+}
+.empty-icon { font-size: 64px; opacity: 0.6; }
+.empty-text { color: var(--t3); font-size: 15px; }
+.empty-sub  { color: var(--t4); font-size: 13px; }
+
+/* ═══════════════════════════════════════════════
+   PLAYER PAGE
+═══════════════════════════════════════════════ */
+.player-wrap { padding: 24px 28px 60px; max-width: 1100px; }
+
+.player-shell {
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--border);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(225,29,72,0.08);
+  position: relative;
+}
+.player-shell video { width: 100%; display: block; aspect-ratio: 16/9; }
+.player-glow-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--p), var(--cyan), var(--orange));
+}
+
+.player-info-card {
+  margin-top: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+}
+
+.player-top-row {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 16px;
+}
+
+.player-title {
+  font-size: 24px; font-weight: 800;
+  letter-spacing: -0.5px; line-height: 1.2;
+  flex: 1;
+}
+
+.player-stats {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 12px; flex-wrap: wrap;
+}
+
+.stat-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px;
+  background: var(--bg4); border-radius: 50px;
+  font-size: 12px; font-weight: 600; color: var(--t2);
+}
+.stat-chip.views { color: var(--yellow); }
+.stat-chip.user  { color: var(--p-glow); }
+
+.btn-purge {
+  padding: 9px 16px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--r-sm); cursor: pointer;
+  color: var(--red); font-size: 13px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+}
+.btn-purge:hover { background: rgba(239,68,68,0.15); border-color: var(--red); }
+
+.player-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.player-desc { font-size: 14px; color: var(--t2); line-height: 1.75; }
+
+/* ═══════════════════════════════════════════════
+   UPLOAD PAGE
+═══════════════════════════════════════════════ */
+.upload-wrap { padding: 24px 28px 80px; }
+
+.upload-hero { margin-bottom: 28px; }
+.upload-hero h1 { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; line-height: 1; }
+.upload-hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--p-glow), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.upload-hero p { color: var(--t2); font-size: 14px; margin-top: 6px; }
+
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 860px; }
+.upload-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; }
+.upload-card.full { grid-column: 1/-1; }
+
+.field-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+.field-input, .field-textarea, .field-select { width: 100%; background: var(--bg4); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; color: var(--t1); font-size: 14px; outline: none; transition: all 0.2s; appearance: none; }
+.field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--p-light); box-shadow: 0 0 0 3px var(--p-dim); }
+.field-input::placeholder, .field-textarea::placeholder { color: var(--t3); }
+.field-textarea { resize: vertical; min-height: 88px; }
+
+.drop-zone { border: 2px dashed rgba(59,130,246,0.2); border-radius: var(--r-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: rgba(37,99,235,0.02); }
+.drop-zone:hover, .drop-zone.dragover { border-color: var(--p-light); background: var(--p-dim); }
+.drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop-icon { font-size: 40px; margin-bottom: 12px; }
+.drop-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.drop-sub { font-size: 13px; color: var(--t3); }
+.drop-sub span { color: var(--p-glow); font-weight: 600; }
+.drop-file { display: none; margin-top: 12px; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--r-sm); padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
+
+.btn-publish { width: 100%; padding: 16px; background: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #f59e0b 100%); border: none; border-radius: var(--r-md); color: #fff; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 24px rgba(225,29,72,0.45); }
+.btn-publish:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(225,29,72,0.55); }
+.btn-publish:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.stats-bar { display: flex; gap: 12px; flex-wrap: wrap; grid-column: 1/-1; margin-top: 4px; }
+.stat-box { flex: 1; min-width: 130px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px; }
+.stat-box-val { font-size: 22px; font-weight: 800; letter-spacing: -1px; color: var(--p-glow); }
+.stat-box-lbl { font-size: 12px; color: var(--t3); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════
+   MOBILE BOTTOM NAV
+═══════════════════════════════════════════════ */
+.mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--mob-nav); background: rgba(8,8,8,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 900; padding: 0 8px env(safe-area-inset-bottom, 0); }
+.mob-nav-inner { display: flex; height: 100%; align-items: center; justify-content: space-around; }
+.mob-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px 12px; border-radius: var(--r-sm); color: var(--t3); transition: all 0.2s; border: none; background: none; flex: 1; max-width: 80px; }
+.mob-nav-btn svg { width: 22px; height: 22px; }
+.mob-nav-btn span { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; }
+.mob-nav-btn.active { color: var(--p-glow); }
+.mob-nav-btn.upload-btn { width: 50px; height: 50px; max-width: 50px; background: linear-gradient(135deg, var(--p), var(--p-light)); border-radius: 50%; color: #fff; padding: 0; box-shadow: 0 4px 20px rgba(225,29,72,0.5); flex-shrink: 0; }
+.mob-nav-btn.upload-btn svg { width: 24px; height: 24px; }
+.mob-nav-btn.upload-btn span { display: none; }
+
+.top-stripe { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--p), var(--cyan), var(--orange), var(--yellow)); z-index: 1001; }
+
+.toast { position: fixed; bottom: calc(var(--mob-nav) + 16px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r-md); padding: 12px 20px; font-size: 14px; font-weight: 600; color: var(--t1); box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999; opacity: 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════════════════════
+   PRO FEATURES STYLES (ADDED)
+═══════════════════════════════════════════════ */
+.btn-action { padding: 9px 16px; border: none; border-radius: var(--r-sm); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; color: #000; flex-shrink: 0; }
+.btn-action.share { background: var(--cyan); }
+.btn-action.sync { background: var(--yellow); }
+
+.thought-card { margin-top: 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.thought-head { background: var(--bg4); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+.thought-area { width: 100%; min-height: 200px; background: transparent; color: var(--green); font-family: 'JetBrains Mono', monospace; padding: 24px; border: none; outline: none; font-size: 14px; line-height: 1.6; resize: vertical; }
+
+.wcam-box { display: none; position: fixed; bottom: calc(var(--mob-nav) + 20px); right: 20px; width: 280px; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r-md); overflow: hidden; z-index: 9999; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+.wcam-head { padding: 10px 16px; background: var(--p); display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 800; font-size: 12px; }
+@media (min-width: 769px) { .wcam-box { bottom: 30px; right: 30px; } }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mob-nav { display: block; }
+  .main { margin-left: 0; padding-bottom: var(--mob-nav); }
+  .topnav { padding: 0 12px; gap: 8px; }
+  .topnav-logo { font-size: 18px; }
+  .topnav-search { max-width: none; }
+  .btn-cta { display: none; }
+  .home-wrap { padding: 16px 14px 24px; }
+  .vgrid { grid-template-columns: 1fr; gap: 14px; }
+  .vcard { display: flex; border-radius: var(--r-md); }
+  .vcard-thumb { width: 140px; flex-shrink: 0; aspect-ratio: 16/9; border-radius: 0; height: auto; }
+  .vcard-body { padding: 12px; flex: 1; min-width: 0; }
+  .vcard-title { font-size: 14px; }
+  .vcard-play { display: none; }
+  .player-wrap { padding: 0; }
+  .player-shell { border-radius: 0; border-left: none; border-right: none; }
+  .player-info-card { border-radius: 0; border-left: none; border-right: none; margin-top: 0; }
+  .player-title { font-size: 18px; }
+  .player-top-row { flex-direction: column; }
+  .upload-wrap { padding: 16px 14px 80px; }
+  .upload-grid { grid-template-columns: 1fr; }
+  .upload-hero h1 { font-size: 26px; }
+  .cat-pill { font-size: 12px; padding: 6px 14px; }
+  .section-title { font-size: 16px; }
+}
+@media (max-width: 480px) { .vcard-thumb { width: 120px; } }
+@media (min-width: 769px) { .mob-nav { display: none; } }
 </style>
 </head>
 <body>
+
 <div class="bg-mesh"></div>
 <div class="top-stripe"></div>
 
 <nav class="topnav">
   <div class="topnav-logo" onclick="showPage('home')">BEAST<span>▸</span>VAULT</div>
-  <div style="flex:1"></div>
-  <div class="topnav-right" style="display:flex; gap:12px;">
-    <button class="btn-brutal" style="background:var(--p-light)" onclick="showPage('upload')">⚡ UNLEASH</button>
-    <button class="btn-brutal" style="background:var(--bg3); color:var(--t1);" id="navAuthBtn" onclick="openAuthModal()">👤 SIGN IN</button>
+  <div class="topnav-search">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input id="searchInput" type="text" placeholder="Search videos...">
+  </div>
+  <div class="topnav-right">
+    <button class="btn-icon" onclick="toggleTheme()" title="Toggle theme">🌓</button>
+    <button class="btn-cta" onclick="showPage('upload')">⚡ Unleash</button>
   </div>
 </nav>
 
 <aside class="sidebar">
-  <div class="sbar-item active" id="sbar-home" onclick="showPage('home')">🏠</div>
-  <div class="sbar-item" id="sbar-yt-hub" onclick="showPage('yt-hub')">🌐</div>
-  <div class="sbar-item" id="sbar-yt" onclick="showPage('youtube')">📹</div>
+  <div class="sbar-item active" id="sbar-home" onclick="showPage('home')">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span>Home</span>
+  </div>
+  <div class="sbar-item" onclick="showPage('upload')">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+    <span>Upload</span>
+  </div>
+  <div class="sbar-divider"></div>
+  <div class="sbar-item" onclick="filterCat('Material Science')">
+    <span style="font-size:18px">🔬</span>
+    <span>Sci</span>
+  </div>
+  <div class="sbar-item" onclick="filterCat('Python Development')">
+    <span style="font-size:18px">🐍</span>
+    <span>Dev</span>
+  </div>
+  <div class="sbar-item" onclick="filterCat('Miyamoto Musashi')">
+    <span style="font-size:18px">⚔️</span>
+    <span>Zen</span>
+  </div>
+  <div class="sbar-item" onclick="filterCat('CUET Preparation')">
+    <span style="font-size:18px">📝</span>
+    <span>CUET</span>
+  </div>
+  <div class="live-indicator">
+    <div class="live-dot"></div>
+    <div class="live-label">LIVE</div>
+  </div>
 </aside>
 
 <main class="main">
+
   <div id="page-home" class="page active">
-    <h1 style="font-size:28px; font-weight:900; margin-bottom:20px;">The Vault <span style="color:var(--p)">.</span></h1>
-    <div class="vgrid" id="mainGrid"></div>
+    <div class="home-wrap">
+
+      <div class="cat-scroll" id="catPills">
+        <div class="cat-pill active" onclick="filterCat(null,this)">All</div>
+        <div class="cat-pill" onclick="filterCat('Material Science',this)">🔬 Material Science</div>
+        <div class="cat-pill" onclick="filterCat('Python Development',this)">🐍 Python Dev</div>
+        <div class="cat-pill" onclick="filterCat('Miyamoto Musashi',this)">⚔️ Musashi Zen</div>
+        <div class="cat-pill" onclick="filterCat('CUET Preparation',this)">📝 CUET Prep</div>
+        <div class="cat-pill" onclick="filterCat('General',this)">📦 General</div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">Videos <span class="dot">•</span></div>
+        <div style="font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace;" id="videoCount"></div>
+      </div>
+
+      <div class="vgrid" id="mainGrid">
+        <div class="empty">
+          <div class="empty-icon">⏳</div>
+          <div class="empty-text">Waking up the vault...</div>
+          <div class="empty-sub">Render cold start — 30 seconds</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="page-player" class="page">
-    <div style="max-width:1200px; margin:0 auto; display:flex; flex-direction:column; align-items:center;">
-      <div id="videoContainer" style="width:100%; aspect-ratio:16/9; border-radius:var(--r-xl); overflow:hidden; background:#000; border:1px solid var(--border2); position:relative;">
-        <video id="playerVideo" playsinline style="width:100%; height:100%;" controls></video>
+    <div class="player-wrap">
+      <div class="player-shell">
+        <video id="playerVideo" controls playsinline></video>
+        <div class="player-glow-bar"></div>
       </div>
-
-      <div style="width:100%; margin-top:20px; display:flex; justify-content:space-between; align-items:flex-start;">
-        <div>
-          <h1 id="vTitle" style="font-size:22px; font-weight:800;">Video Title</h1>
-          <p id="vUploader" style="color:var(--t2); font-size:14px; margin-top:5px;">@beast</p>
-        </div>
-        <div style="display:flex; gap:12px;">
-            <button class="btn-brutal" style="background:var(--cyan); color:#000;" onclick="copyShareLink()">🔗 SHARE</button>
-            <button class="btn-brutal" style="background:var(--yellow); color:#000;" onclick="startVaultLiveReview()">👥 SYNC ROOM</button>
-        </div>
-      </div>
-
-      <div class="thought-container">
-        <div class="thought-header">
-          <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-weight:900; font-size:13px; letter-spacing:1px;">📝 THOUGHT BOARD</span>
-              <span id="syncIndicator" style="font-family:'JetBrains Mono'; font-size:10px; font-weight:700;">STATIONARY</span>
+      <div class="player-info-card">
+        <div class="player-top-row">
+          <h1 class="player-title" id="vTitle">Video Title</h1>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-action share" onclick="copyShareLink()">🔗 Share</button>
+            <button class="btn-action sync" onclick="startVaultLiveReview()">👥 Sync</button>
+            <button class="btn-purge" id="purgeBtn">✕ Purge</button>
           </div>
-          <button class="btn-brutal" style="background:#fff; color:#000; padding:5px 10px; font-size:10px; box-shadow:2px 2px 0px #000;" onclick="exportThoughtsAsPDF()">💾 EXPORT PDF</button>
         </div>
-        <textarea id="thoughtArea" class="thought-area" placeholder="Type notes or Python code here... Everyone in the room sees this live!"></textarea>
+        <div class="player-stats">
+          <div class="stat-chip views">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/>
+            </svg>
+            <span id="vViews">0 views</span>
+          </div>
+          <div class="stat-chip user">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+            </svg>
+            <span id="vUploader">beast</span>
+          </div>
+          <div class="stat-chip" id="vCatChip"></div>
+        </div>
+        <div class="player-divider"></div>
+        <div class="player-desc" id="vDesc">No description provided.</div>
       </div>
+      
+      <div class="thought-card">
+        <div class="thought-head">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-weight:800; font-size:13px; color:var(--p-glow); letter-spacing:1px;">📝 THOUGHT BOARD</span>
+            <span id="syncIndicator" style="font-family:'JetBrains Mono'; font-size:10px; color:var(--t3);">STATIONARY</span>
+          </div>
+          <button onclick="exportThoughtsAsPDF()" style="padding:6px 12px; background:#fff; border:none; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; color:#000;">💾 Export PDF</button>
+        </div>
+        <textarea id="thoughtArea" class="thought-area" placeholder="Write code, project notes, or thoughts here... Everyone in the room sees this live!"></textarea>
+      </div>
+
     </div>
   </div>
 
   <div id="page-upload" class="page">
-    <div style="max-width:600px; margin:0 auto; background:var(--bg3); border:1px solid var(--border); border-radius:var(--r-lg); padding:30px;">
-      <h2 style="font-size:24px; font-weight:900; margin-bottom:20px;">Unleash Content ⚡</h2>
-      <div style="display:flex; flex-direction:column; gap:15px;">
-        <input type="file" id="fileInput" accept="video/*" style="padding:10px; border:1px dashed var(--t3); border-radius:10px;">
-        <input type="text" id="upTitle" placeholder="Title..." style="padding:12px; background:var(--bg4); border:1px solid var(--border); border-radius:10px; color:#fff;">
-        
-        <div style="display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.2); padding:12px; border-radius:10px;">
-          <input type="checkbox" id="upPrivate" style="width:20px; height:20px; cursor:pointer;">
-          <label for="upPrivate" style="font-weight:700; cursor:pointer;">PRIVATE VAULT (HIDDEN FROM FEED)</label>
+    <div class="upload-wrap">
+      <div class="upload-hero">
+        <h1>Unleash <em>Content</em></h1>
+        <p>Upload to the vault. Cloudinary delivers it worldwide.</p>
+      </div>
+
+      <div class="upload-grid">
+
+        <div class="upload-card full" style="padding:0;background:transparent;border:none;">
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept="video/*" onchange="onFileChange(this)">
+            <div class="drop-icon">🎬</div>
+            <div class="drop-title">Drop your video here</div>
+            <div class="drop-sub">or <span>click to browse</span> — MP4, MOV, AVI up to 500MB</div>
+            <div class="drop-file" id="dropFile"></div>
+          </div>
         </div>
 
-        <button class="btn-brutal" id="publishBtn" onclick="publishVideo()" style="width:100%; justify-content:center;">🚀 PUBLISH TO VAULT</button>
+        <div class="upload-card">
+          <label class="field-label">Title</label>
+          <input class="field-input" id="upTitle" type="text" placeholder="Enter video title...">
+        </div>
+
+        <div class="upload-card">
+          <label class="field-label">Category</label>
+          <select class="field-select" id="upCat">
+            <option>General</option>
+            <option>Material Science</option>
+            <option>Python Development</option>
+            <option>Miyamoto Musashi</option>
+            <option>CUET Preparation</option>
+          </select>
+        </div>
+
+        <div class="upload-card full">
+          <label class="field-label">Description</label>
+          <textarea class="field-textarea" id="upDesc" placeholder="What's this video about?"></textarea>
+        </div>
+
+        <div class="upload-card full" style="display:flex; align-items:center; gap:12px; padding:16px 24px;">
+          <input type="checkbox" id="upPrivate" style="width:20px; height:20px; accent-color:var(--p); cursor:pointer;">
+          <label for="upPrivate" style="font-weight:700; font-size:13px; letter-spacing:0.5px; cursor:pointer;">PRIVATE VAULT (HIDDEN FROM FEED)</label>
+        </div>
+
+        <div class="upload-card full" style="padding:0;background:transparent;border:none;">
+          <button class="btn-publish" id="publishBtn" onclick="publishVideo()">
+            ⚡ PUBLISH TO VAULT
+          </button>
+        </div>
+
+        <div class="stats-bar">
+          <div class="stat-box">
+            <div class="stat-box-val" id="statTotal">—</div>
+            <div class="stat-box-lbl">Videos in vault</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-val" id="statViews">—</div>
+            <div class="stat-box-lbl">Total views</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-val" style="color:var(--green)">25 GB</div>
+            <div class="stat-box-lbl">Cloudinary storage</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
+
 </main>
 
-<div id="webcamContainer" class="webcam-container">
-  <div style="padding:8px 15px; background:var(--p); border-bottom:1px solid #000; display:flex; justify-content:space-between; align-items:center; color:#fff; font-weight:900;">
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span id="memberBadge" style="background:#000; color:#fff; padding:2px 6px; border-radius:50px; font-size:10px;">1</span>
-        <span style="font-size:11px;">LIVE CONSOLE</span>
-    </div>
-    <button onclick="endCall()" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:900;">✕</button>
+<nav class="mob-nav">
+  <div class="mob-nav-inner">
+    <button class="mob-nav-btn active" id="mob-home" onclick="showPage('home')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Home</span>
+    </button>
+    <button class="mob-nav-btn" onclick="showPage('home');setTimeout(()=>document.getElementById('searchInput').focus(),300)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <span>Search</span>
+    </button>
+    <button class="mob-nav-btn upload-btn" onclick="showPage('upload')">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      <span>Upload</span>
+    </button>
+    <button class="mob-nav-btn" onclick="filterCat('CUET Preparation')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      <span>Cats</span>
+    </button>
+    <button class="mob-nav-btn" onclick="toggleTheme()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+      <span>Theme</span>
+    </button>
   </div>
-  <video id="remoteVideo" style="width:100%; background:#111;" autoplay playsinline></video>
-  <video id="localVideo" style="width:30%; position:absolute; bottom:8px; right:8px; border:1px solid #fff; border-radius:8px;" autoplay playsinline muted></video>
+</nav>
+
+<div id="webcamContainer" class="wcam-box">
+  <div class="wcam-head">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span id="memberBadge" style="background:#000; color:#fff; padding:2px 8px; border-radius:50px; font-size:10px;">1</span>
+      <span>LIVE CONSOLE</span>
+    </div>
+    <span onclick="endCall()" style="cursor:pointer; font-size:14px;">✕</span>
+  </div>
+  <video id="remoteVideo" style="width:100%; aspect-ratio:16/9; background:#111; display:block;" autoplay playsinline></video>
+  <video id="localVideo" style="width:30%; position:absolute; bottom:10px; right:10px; border:2px solid #fff; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.5);" autoplay playsinline muted></video>
 </div>
 
-<div id="toast" style="position:fixed; bottom:40px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:15px 30px; border-radius:50px; font-weight:800; border:2px solid var(--p); display:none; z-index:10000;"></div>
+<div class="toast" id="toast"></div>
 
 <script>
 const API = 'https://beastvault-backend.onrender.com/api';
 const socket = io(API.replace('/api', ''));
-let allVideos = [], currentRoom = null, currentVideoId = null;
+let allVideos = [], hlsInst = null, currentTheme = 'dark';
+let currentRoom = null, currentVideoId = null;
 
+/* ── Theme ── */
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(currentTheme);
+  localStorage.setItem('bv-theme', currentTheme);
+}
+function applyTheme(t) {
+  currentTheme = t;
+  if (t === 'light') {
+    document.documentElement.style.setProperty('--bg',   '#f0f4ff');
+    document.documentElement.style.setProperty('--bg2',  '#ffffff');
+    document.documentElement.style.setProperty('--bg3',  '#e4eaff');
+    document.documentElement.style.setProperty('--bg4',  '#d8e2ff');
+    document.documentElement.style.setProperty('--t1',   '#0a1628');
+    document.documentElement.style.setProperty('--t2',   '#3a5080');
+    document.documentElement.style.setProperty('--t3',   '#8a9ab8');
+    document.documentElement.style.setProperty('--t4',   '#c0d0e8');
+  } else {
+    document.documentElement.style.removeProperty('--bg');
+    document.documentElement.style.removeProperty('--bg2');
+    document.documentElement.style.removeProperty('--bg3');
+    document.documentElement.style.removeProperty('--bg4');
+    document.documentElement.style.removeProperty('--t1');
+    document.documentElement.style.removeProperty('--t2');
+    document.documentElement.style.removeProperty('--t3');
+    document.documentElement.style.removeProperty('--t4');
+  }
+}
+applyTheme(localStorage.getItem('bv-theme') || 'dark');
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── Navigation ── */
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sbar-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  const sbar = document.getElementById('sbar-' + id);
-  if(sbar) sbar.classList.add('active');
-  if (id === 'home') fetchVideos();
-  window.scrollTo(0,0);
+
+  document.querySelectorAll('.sbar-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.mob-nav-btn').forEach(i => i.classList.remove('active'));
+
+  if (id === 'home') {
+    document.getElementById('sbar-home')?.classList.add('active');
+    document.getElementById('mob-home')?.classList.add('active');
+    fetchVideos();
+  }
+  if (id !== 'player') {
+    const v = document.getElementById('playerVideo');
+    if (v) { v.pause(); v.src = ''; }
+    if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* ── Fetch Videos ── */
 async function fetchVideos() {
-  const r = await fetch(API + '/videos');
-  const d = await r.json();
-  allVideos = d.videos || [];
-  // Filter out Private videos for the public feed
-  const publicVids = allVideos.filter(v => v.is_private !== true);
-  renderGrid(publicVids);
+  try {
+    const r = await fetch(API + '/videos', { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    const d = await r.json();
+    allVideos = d.videos || [];
+    renderGrid(allVideos.filter(v => !v.is_private));
+    updateStats();
+  } catch(e) {
+    document.getElementById('mainGrid').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Vault offline</div>
+        <div class="empty-sub">Backend waking up — refresh in 30s</div>
+      </div>`;
+  }
 }
 
+function updateStats() {
+  const total = allVideos.length;
+  const views = allVideos.reduce((a,v) => a + (parseInt(v.views)||0), 0);
+  const el1 = document.getElementById('statTotal');
+  const el2 = document.getElementById('statViews');
+  if (el1) el1.textContent = total;
+  if (el2) el2.textContent = views >= 1000 ? (views/1000).toFixed(1)+'k' : views;
+}
+
+/* ── Render Grid ── */
 function renderGrid(vids) {
   const g = document.getElementById('mainGrid');
-  if(!vids.length) { g.innerHTML = "<p>Vault is empty...</p>"; return; }
+  const cnt = document.getElementById('videoCount');
+  if (cnt) cnt.textContent = vids.length + ' videos';
+
+  if (!vids.length) {
+    g.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🎬</div>
+        <div class="empty-text">Vault is empty</div>
+        <div class="empty-sub">Hit ⚡ Unleash to add your first video</div>
+      </div>`;
+    return;
+  }
+
   g.innerHTML = vids.map(v => `
     <div class="vcard" onclick="openPlayer('${v.id}')">
-      <div class="vcard-thumb"><img src="${v.thumbnail_url || ''}"></div>
-      <div class="vcard-body">
-        <div style="font-weight:700; font-size:14px;">${v.title}</div>
-        <div style="font-size:11px; color:var(--t2); margin-top:4px;">BY @${v.uploader || 'beast'}</div>
+      <div class="vcard-thumb">
+        <div class="vcard-overlay"></div>
+        <div class="vcard-badge">${(v.status||'ready').toUpperCase()}</div>
+        ${v.thumbnail_url
+          ? `<img src="${v.thumbnail_url}" loading="lazy" onerror="this.remove()">`
+          : '<span style="z-index:1">🎬</span>'}
+        <div class="vcard-play"><div class="play-ring">▶</div></div>
       </div>
-    </div>`).join('');
+      <div class="vcard-body">
+        <div class="vcard-title">${v.title}</div>
+        <div class="vcard-meta">
+          <div class="vcard-views">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/>
+            </svg>
+            ${v.views||0}
+          </div>
+          <span style="color:var(--t4)">•</span>
+          <span>${v.uploader||'beast'}</span>
+          ${v.category ? `<div class="vcard-cat">${v.category}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
+/* ── Filter ── */
+function filterCat(cat, el) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  showPage('home');
+  const filtered = cat ? allVideos.filter(v => !v.is_private && v.category === cat) : allVideos.filter(v => !v.is_private);
+  setTimeout(() => renderGrid(filtered), 50);
+}
+
+/* ── Search ── */
+document.getElementById('searchInput').oninput = e => {
+  const q = e.target.value.toLowerCase();
+  renderGrid(q ? allVideos.filter(v => !v.is_private && v.title.toLowerCase().includes(q)) : allVideos.filter(v => !v.is_private));
+};
+
+/* ── Record View ── */
+async function recView(id) {
+  try { await fetch(API + '/videos/' + id + '/view', { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } }); } catch(e) {}
+}
+
+/* ── Open Player ── */
 async function openPlayer(id) {
-  const v = allVideos.find(x => x.id == id);
+  let v = allVideos.find(x => x.id === id);
   if (!v) {
-      // Direct fetch if not in the grid (for deep links)
-      try {
-          const resp = await fetch(`${API}/videos/${id}`);
-          const data = await resp.json();
-          if (data.video) { allVideos.push(data.video); return openPlayer(id); }
-      } catch(e) { return; }
+      try { const resp = await fetch(API + '/videos/' + id); const data = await resp.json(); if(data.video) { allVideos.push(data.video); v = data.video; } else return; } catch(e) { return; }
   }
+  
   currentVideoId = id;
   showPage('player');
+  recView(id);
+
   document.getElementById('vTitle').textContent = v.title;
+  document.getElementById('vViews').textContent = ((v.views||0)+1) + ' views';
+  document.getElementById('vUploader').textContent = v.uploader || 'beast';
+  document.getElementById('vDesc').textContent = v.description || 'No description provided.';
+  document.getElementById('purgeBtn').onclick = () => deleteVideo(v.id);
+
+  const chip = document.getElementById('vCatChip');
+  chip.textContent = v.category || '';
+  chip.style.display = v.category ? '' : 'none';
+
   const vid = document.getElementById('playerVideo');
-  vid.src = v.hls_url;
-  vid.play();
+  if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
+  if (!v.hls_url) return;
+
+  if (v.hls_url.includes('.m3u8') && Hls.isSupported()) {
+    hlsInst = new Hls();
+    hlsInst.loadSource(v.hls_url);
+    hlsInst.attachMedia(vid);
+    hlsInst.on(Hls.Events.MANIFEST_PARSED, () => vid.play());
+  } else {
+    vid.src = v.hls_url;
+    vid.load();
+    vid.play().catch(()=>{});
+  }
 }
 
-/* SYNC & THOUGHT BOARD LOGIC */
+/* ── COLLAB ENGINE ── */
 const thoughtArea = document.getElementById('thoughtArea');
 const indicator = document.getElementById('syncIndicator');
 
@@ -228,66 +1032,151 @@ socket.on('sync-thoughts', (data) => {
 });
 
 socket.on('room-metrics', (data) => {
-    document.getElementById('memberBadge').textContent = data.members;
+  const badge = document.getElementById('memberBadge');
+  if (badge) badge.textContent = data.members;
 });
 
-function exportThoughtsAsPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const content = thoughtArea.value;
-    if(!content.trim()) return showToast("⚠️ NO NOTES FOUND");
-    doc.setFont("helvetica", "bold"); doc.text("BEASTVAULT NOTES", 20, 20);
-    doc.setFont("courier", "normal"); doc.text(doc.splitTextToSize(content, 170), 20, 40);
-    doc.save(`BeastVault_Notes.pdf`);
-    showToast("📄 PDF EXPORTED!");
-}
+socket.on('request-room-state', (data) => {
+    if (currentRoom) {
+        const vid = document.getElementById('playerVideo');
+        socket.emit('send-room-state', {
+            to: data.requester,
+            state: { time: vid.currentTime, thought: thoughtArea.value, playing: !vid.paused }
+        });
+    }
+});
 
-function copyShareLink() {
-  if (!currentVideoId) return;
-  const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}${currentRoom ? '&room='+currentRoom : ''}`;
-  navigator.clipboard.writeText(link);
-  showToast("🔗 LINK COPIED!");
-}
+socket.on('receive-room-state', (state) => {
+    const vid = document.getElementById('playerVideo');
+    if(vid) vid.currentTime = state.time;
+    thoughtArea.value = state.thought;
+    if (state.playing && vid) vid.play();
+});
 
 async function startVaultLiveReview() {
   if (!currentRoom) currentRoom = Math.random().toString(36).substring(7);
   document.getElementById('webcamContainer').style.display = 'block';
   socket.emit('join-room', currentRoom);
   copyShareLink();
-}
-
-async function publishVideo() {
-  const file = document.getElementById('fileInput').files[0];
-  const title = document.getElementById('upTitle').value;
-  const isPrivate = document.getElementById('upPrivate').checked;
-  if(!file || !title) return showToast("⚠️ FILL FIELDS");
-
-  const btn = document.getElementById('publishBtn');
-  btn.innerHTML = "⏳ UPLOADING...";
-  const fd = new FormData();
-  fd.append('video', file); fd.append('title', title); fd.append('is_private', isPrivate);
-
   try {
-    const r = await fetch(API + '/videos/upload', { method: 'POST', body: fd });
-    if(r.ok) { showToast("🦁 UNLEASHED!"); showPage('home'); }
-  } catch(e) { showToast("❌ FAILED"); }
-  finally { btn.innerHTML = "🚀 PUBLISH TO VAULT"; }
-}
-
-function showToast(m) {
-  const t = document.getElementById('toast');
-  t.textContent = m; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 3000);
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('localVideo').srcObject = stream;
+  } catch(e) { showToast("⚠️ Webcam error"); }
 }
 
 function endCall() { document.getElementById('webcamContainer').style.display = 'none'; }
 
-/* URL DEEP LINKS */
+function copyShareLink() {
+  if (!currentVideoId) return;
+  const link = location.origin + location.pathname + '?video=' + currentVideoId + (currentRoom ? '&room='+currentRoom : '');
+  navigator.clipboard.writeText(link);
+  showToast("🔗 Link copied to clipboard!");
+}
+
+function exportThoughtsAsPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const content = thoughtArea.value;
+  if(!content.trim()) return showToast("⚠️ No notes to export");
+  doc.setFont("helvetica", "bold"); doc.text("BeastVault Session Notes", 20, 20);
+  doc.setFont("courier", "normal"); doc.text(doc.splitTextToSize(content, 170), 20, 40);
+  doc.save(`BeastVault_Notes.pdf`);
+  showToast("📄 PDF Exported!");
+}
+
+/* ── File change ── */
+function onFileChange(input) {
+  const f = input.files[0];
+  if (!f) return;
+  const el = document.getElementById('dropFile');
+  el.textContent = `📹 ${f.name}`;
+  el.style.display = 'inline-block';
+}
+
+/* ── Publish ── */
+async function publishVideo() {
+  const file = document.getElementById('fileInput').files[0];
+  const title = document.getElementById('upTitle').value.trim();
+  if (!file) return showToast('⚠️ Please select a video file');
+  if (!title) return showToast('⚠️ Please enter a title');
+
+  const btn = document.getElementById('publishBtn');
+  btn.textContent = '⏳ Uploading to Cloudinary...';
+  btn.disabled = true;
+
+  const fd = new FormData();
+  fd.append('video', file);
+  fd.append('title', title);
+  fd.append('description', document.getElementById('upDesc').value);
+  fd.append('category', document.getElementById('upCat').value);
+  fd.append('is_private', document.getElementById('upPrivate').checked); // Added Private support
+
+  try {
+    const r = await fetch(API + '/videos/upload', {
+      method: 'POST', body: fd,
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }
+    });
+    if (r.ok) {
+      showToast('🦁 Unleashed! Video is live.');
+      document.getElementById('fileInput').value = '';
+      document.getElementById('dropFile').style.display = 'none';
+      document.getElementById('upTitle').value = '';
+      document.getElementById('upDesc').value = '';
+      showPage('home');
+    } else {
+      const err = await r.json().catch(()=>({}));
+      showToast('❌ ' + (err.error || 'Upload failed'));
+    }
+  } catch(e) {
+    showToast('❌ Network error — check connection');
+  } finally {
+    btn.textContent = '⚡ PUBLISH TO VAULT';
+    btn.disabled = false;
+  }
+}
+
+/* ── Delete ── */
+async function deleteVideo(id) {
+  if (!confirm('Purge this video permanently from the vault?')) return;
+  try {
+    const r = await fetch(API + '/videos/' + id, {
+      method: 'DELETE', headers: { 'Bypass-Tunnel-Reminder': 'true' }
+    });
+    if (r.ok) { showToast('🗑️ Video purged.'); showPage('home'); }
+  } catch(e) { showToast('❌ Delete failed'); }
+}
+
+/* ── Drag over dropzone ── */
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('video/')) {
+    const input = document.getElementById('fileInput');
+    const dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
+    onFileChange(input);
+  }
+});
+
+/* ── Initialize ── */
 window.addEventListener('DOMContentLoaded', async () => {
-  await fetchVideos();
+  await fetchVideos(); 
+  
   const urlParams = new URLSearchParams(window.location.search);
-  const videoId = urlParams.get('video'), roomId = urlParams.get('room');
-  if (videoId) { await openPlayer(videoId); if (roomId) { currentRoom = roomId; socket.emit('join-room', currentRoom); document.getElementById('webcamContainer').style.display = 'block'; } }
+  const videoId = urlParams.get('video');
+  const roomId = urlParams.get('room');
+
+  if (videoId) {
+    await openPlayer(videoId);
+    if (roomId) {
+      currentRoom = roomId;
+      socket.emit('join-room', currentRoom);
+      socket.emit('request-room-state', { room: currentRoom });
+      document.getElementById('webcamContainer').style.display = 'block';
+    }
+  }
 });
 </script>
 </body>
