@@ -28,34 +28,36 @@ function uploadToCloudinary(buffer) {
 router.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No video file provided' });
 
-  const { title, description, category } = req.body;
+  // 1. Extract is_private from body
+  const { title, description, category, is_private } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
+
+  // 2. Convert string "true"/"false" to actual Boolean
+  const privateFlag = is_private === 'true' || is_private === true;
 
   try {
     console.log(`⬆️  Uploading "${title}" to Cloudinary...`);
 
-    // 1. Push to Cloudinary
     const result = await uploadToCloudinary(req.file.buffer);
 
-    const videoUrl     = result.secure_url;   // playable video URL
+    const videoUrl     = result.secure_url;
     const thumbnailUrl = cloudinary.url(result.public_id + '.jpg', {
       resource_type: 'video',
       transformation: [{ width: 640, height: 360, crop: 'fill' }],
       secure: true,
     });
 
-    // 2. Get or use first user
     const userRes = await query('SELECT id FROM users LIMIT 1');
     if (userRes.rowCount === 0)
       return res.status(500).json({ error: 'No users found. Create a user first.' });
 
     const userId = req.user ? req.user.id : userRes.rows[0].id;
 
-    // 3. Save to DB — status is immediately 'ready' (Cloudinary already processed it)
+    // 3. Save to DB including the is_private flag
     const { rows } = await query(
       `INSERT INTO videos
-         (user_id, title, description, category, status, hls_url, thumbnail_url, raw_storage_key, size_bytes)
-       VALUES ($1, $2, $3, $4, 'ready', $5, $6, $7, $8)
+         (user_id, title, description, category, status, hls_url, thumbnail_url, raw_storage_key, size_bytes, is_private)
+       VALUES ($1, $2, $3, $4, 'ready', $5, $6, $7, $8, $9)
        RETURNING id`,
       [
         userId,
@@ -66,10 +68,11 @@ router.post('/upload', upload.single('video'), async (req, res) => {
         thumbnailUrl,
         result.public_id,
         req.file.size,
+        privateFlag
       ]
     );
 
-    console.log(`✅ Video "${title}" is LIVE — ID: ${rows[0].id}`);
+    console.log(`✅ Video "${title}" is LIVE — Private: ${privateFlag} — ID: ${rows[0].id}`);
 
     res.status(202).json({
       message: 'Video unleashed to the vault!',
@@ -89,10 +92,11 @@ router.get('/', optionalAuth, async (req, res) => {
   const offset   = parseInt(req.query.offset || '0');
   const category = req.query.category;
 
+  // RULE: By default, we only show PUBLIC videos (is_private = false)
   let sql = `
     SELECT v.id, v.title, v.description, v.category,
            v.hls_url, v.thumbnail_url, v.views, v.duration_secs,
-           v.status, v.created_at,
+           v.status, v.created_at, v.is_private,
            u.id AS uploader_id,
            u.username AS uploader,
            u.avatar_url,
@@ -100,7 +104,7 @@ router.get('/', optionalAuth, async (req, res) => {
     FROM videos v
     JOIN users u ON u.id = v.user_id
     LEFT JOIN likes l ON l.video_id = v.id
-    WHERE 1=1
+    WHERE v.is_private = false
   `;
   const params = [];
 
@@ -138,7 +142,9 @@ router.get('/search', optionalAuth, async (req, res) => {
        FROM videos v
        JOIN users u ON u.id = v.user_id,
        plainto_tsquery('english', $1) query
-       WHERE v.status = 'ready' AND v.search_vector @@ query
+       WHERE v.status = 'ready' 
+         AND v.is_private = false 
+         AND v.search_vector @@ query
        ORDER BY rank DESC LIMIT 30`,
       [q]
     );
@@ -191,7 +197,6 @@ router.delete('/:id', async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: 'Video not found' });
 
-    // Delete from Cloudinary
     if (rows[0].raw_storage_key) {
       await cloudinary.uploader.destroy(rows[0].raw_storage_key, { resource_type: 'video' });
     }
