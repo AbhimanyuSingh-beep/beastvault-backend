@@ -86,7 +86,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 @media(hover:hover){.vcard:hover{transform:translateY(-4px);border-color:rgba(225,29,72,0.4);box-shadow:0 16px 48px rgba(0,0,0,0.6),var(--glow);}}
 .vcard-thumb{position:relative;aspect-ratio:16/9;background:var(--bg4);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:40px;}
 .vcard-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.4s;}
-.vcard:hover .vcard-thumb img{transform:scale(1.06);}
 .vcard-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(3,5,15,0.85) 100%);}
 .vcard-badge{position:absolute;top:8px;left:8px;background:rgba(3,5,15,0.8);border:1px solid rgba(225,29,72,0.45);color:var(--p-glow);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:0.5px;}
 .vcard-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
@@ -105,20 +104,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 /* PLAYER */
 .player-wrap{padding:20px 20px 60px;width:100%;display:flex;flex-direction:column;align-items:center;}
 .player-shell{width:100%;max-width:1200px;aspect-ratio:16/9;position:relative;border-radius:var(--r-xl);overflow:hidden;background:#000;box-shadow:0 0 60px rgba(225,29,72,0.12),0 24px 60px rgba(0,0,0,0.8);border:1px solid var(--border2);}
-.player-shell video{width:100%;height:100%;display:block;object-fit:contain;cursor:pointer;}
-.custom-controls{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.5) 40%,transparent 100%);padding:36px 20px 14px;opacity:0;transition:opacity 0.3s;display:flex;flex-direction:column;gap:10px;z-index:10;}
-.player-shell:hover .custom-controls,.custom-controls.active{opacity:1;}
-.progress-area{width:100%;height:6px;background:rgba(255,255,255,0.2);border-radius:4px;cursor:pointer;position:relative;transition:height 0.2s;}
-.progress-area:hover,.progress-area:active{height:9px;}
-.progress-bar{height:100%;background:linear-gradient(90deg,var(--p),var(--cyan));border-radius:4px;width:0%;position:relative;pointer-events:none;}
-.progress-bar::after{content:'';position:absolute;right:-6px;top:-4px;width:14px;height:14px;background:#fff;border-radius:50%;box-shadow:0 0 12px var(--p-glow);opacity:0;transition:opacity 0.2s;pointer-events:none;}
-.progress-area:hover .progress-bar::after,.progress-area:active .progress-bar::after{opacity:1;}
-.controls-row{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff;}
-.controls-left,.controls-right{display:flex;align-items:center;gap:10px;}
-.ctrl-btn{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;transition:transform 0.2s,color 0.2s;display:flex;align-items:center;justify-content:center;width:var(--touch-min);height:var(--touch-min);border-radius:50%;}
-.ctrl-btn:hover,.ctrl-btn:active{background:rgba(255,255,255,0.15);color:var(--p-glow);}
-.ctrl-time{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-left:4px;}
-.vol-slider{width:72px;accent-color:var(--p);cursor:pointer;height:4px;border-radius:2px;}
+.player-shell video{width:100%;height:100%;display:block;object-fit:contain;}
 .player-glow-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--cyan),var(--orange));}
 
 .player-info-card{width:100%;max-width:1200px;margin-top:20px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;}
@@ -128,30 +114,17 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .stat-chip{display:flex;align-items:center;gap:5px;padding:5px 11px;background:var(--bg4);border-radius:50px;font-size:12px;font-weight:600;color:var(--t2);}
 .stat-chip.views{color:var(--yellow);}
 .stat-chip.user{color:var(--p-glow);}
-.btn-purge{padding:9px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-sm);cursor:pointer;color:var(--red);font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;white-space:nowrap;transition:all 0.2s;flex-shrink:0;min-height:var(--touch-min);}
-.btn-purge:hover,.btn-purge:active{background:rgba(239,68,68,0.15);border-color:var(--red);}
+.btn-action{padding:9px 16px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;color:var(--t1);font-size:13px;font-weight:700;transition:all 0.2s;flex-shrink:0;}
+.btn-action:hover{border-color:var(--p-light);background:var(--p-dim);}
+.btn-purge{padding:9px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-sm);cursor:pointer;color:var(--red);font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
+.btn-purge:hover{background:rgba(239,68,68,0.15);border-color:var(--red);}
 .player-divider{height:1px;background:var(--border);margin:16px 0;}
 .player-desc{font-size:14px;color:var(--t2);line-height:1.75;}
 
-/* COMMENTS */
-.comments-section{width:100%;max-width:1200px;margin-top:16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;}
-.comments-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-.comments-title span{background:var(--p-dim);color:var(--p-glow);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;}
-.comment-form{display:flex;gap:10px;margin-bottom:20px;align-items:flex-start;}
-.comment-avatar{width:36px;height:36px;border-radius:50%;background:var(--p-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--p-glow);flex-shrink:0;}
-.comment-input-wrap{flex:1;display:flex;flex-direction:column;gap:8px;}
-.comment-input{width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;color:var(--t1);font-size:14px;outline:none;resize:none;min-height:44px;transition:all 0.2s;}
-.comment-input:focus{border-color:var(--p-light);box-shadow:0 0 0 3px var(--p-dim);min-height:80px;}
-.comment-input::placeholder{color:var(--t3);}
-.btn-comment{align-self:flex-end;padding:8px 16px;background:var(--p);border:none;border-radius:var(--r-sm);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;min-height:36px;}
-.btn-comment:active{transform:scale(0.97);}
-.comment-list{display:flex;flex-direction:column;gap:14px;}
-.comment-item{display:flex;gap:10px;}
-.comment-body{flex:1;}
-.comment-user{font-size:13px;font-weight:700;color:var(--p-glow);margin-bottom:3px;}
-.comment-text{font-size:14px;color:var(--t2);line-height:1.6;}
-.comment-time{font-size:11px;color:var(--t3);margin-top:3px;}
-.comment-empty{text-align:center;color:var(--t3);font-size:13px;padding:20px 0;}
+/* THOUGHT BOARD & DOUBTS */
+.thought-card{margin-top:24px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-md);overflow:hidden;}
+.thought-head{background:var(--bg4);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.thought-area{width:100%;min-height:250px;background:transparent;color:var(--green);font-family:'JetBrains Mono',monospace;padding:20px;border:none;outline:none;font-size:15px;line-height:1.6;resize:vertical;}
 
 /* UPLOAD */
 .upload-wrap{padding:20px 20px 80px;}
@@ -165,7 +138,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .field-label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:7px;font-family:'JetBrains Mono',monospace;}
 .field-input,.field-textarea,.field-select{width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px 14px;color:var(--t1);font-size:15px;outline:none;transition:all 0.2s;appearance:none;min-height:var(--touch-min);}
 .field-input:focus,.field-textarea:focus,.field-select:focus{border-color:var(--p-light);box-shadow:0 0 0 3px var(--p-dim);}
-.field-input::placeholder,.field-textarea::placeholder{color:var(--t3);}
 .field-textarea{resize:vertical;min-height:88px;}
 .drop-zone{border:2px dashed rgba(225,29,72,0.2);border-radius:var(--r-md);padding:36px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:rgba(225,29,72,0.02);}
 .drop-zone:active,.drop-zone.dragover{border-color:var(--p-light);background:var(--p-dim);}
@@ -257,7 +229,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .toast{position:fixed;bottom:calc(var(--mob-nav) + 12px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-md);padding:11px 18px;font-size:14px;font-weight:600;color:var(--t1);box-shadow:0 8px 28px rgba(0,0,0,0.4);z-index:9999;opacity:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* FLOATING WEBCAM BOX (DRAGGABLE & RESIZABLE) */
+/* FLOATING WEBCAM BOX */
 .webcam-container{
   display:none; position:fixed; top:80px; right:20px; z-index:9999; 
   width:260px; min-width:150px; min-height:100px;
@@ -279,6 +251,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   .player-layout { flex-direction: column !important; }
   .player-side { width: 100% !important; position: static !important; margin-top: 20px; }
 }
+
 @media(max-width:768px){
   .sidebar{display:none;}
   .mob-nav{display:block;}
@@ -295,7 +268,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   .vcard-title{font-size:13px;}
   .vcard-play{display:none;}
   
-  /* YOUTUBE MOBILE PLAYER OPTIMIZATION */
   .player-wrap{padding:0;}
   .player-shell{border-radius:0;border-left:none;border-right:none;box-shadow:none; width:100vw; max-width:100vw;}
   .custom-controls{padding:28px 10px 10px;}
@@ -434,104 +406,37 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
   <div id="page-player" class="page">
     <div class="player-wrap">
-      
-      <div class="player-layout" style="display: flex; gap: 20px; align-items: flex-start; width: 100%;">
-        
-        <div class="player-main" style="flex: 1; min-width: 0; width: 100%;">
-          <div class="player-shell">
-            <div class="sync-overlay" style="display:none; position:absolute; inset:0; z-index:20; background:transparent;"></div>
-            
-            <video id="playerVideo" playsinline onclick="togglePlay()"></video>
-            <div class="custom-controls" id="customControls">
-              <div class="progress-area" id="progressArea" onclick="seekVideo(event)">
-                <div class="progress-bar" id="progressBar"></div>
-              </div>
-              <div class="controls-row">
-                <div class="controls-left">
-                  <button class="ctrl-btn" onclick="togglePlay()" title="Play/Pause">
-                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path id="playIcon" d="M8 5v14l11-7z"/></svg>
-                  </button>
-                  <button class="ctrl-btn" onclick="skip(-10)" title="Back 10s">
-                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
-                  </button>
-                  <button class="ctrl-btn" onclick="skip(10)" title="Forward 10s">
-                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
-                  </button>
-                  <div class="ctrl-time"><span id="currentTime">00:00</span><span style="color:var(--t3);margin:0 4px">/</span><span id="totalTime" style="color:var(--t2)">00:00</span></div>
-                </div>
-                <div class="controls-right">
-                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" class="vol-icon" style="margin-right:-8px;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                  <input type="range" id="volumeSlider" class="vol-slider" min="0" max="1" step="0.05" value="1" oninput="changeVolume(this.value)">
-                  
-                  <button class="ctrl-btn" onclick="togglePiP()" title="Picture-in-Picture" style="margin-left:6px;">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/><rect x="12" y="11" width="7" height="6" rx="1" ry="1"/></svg>
-                  </button>
+      <div class="player-shell" style="background:#000; position:relative;">
+        <div class="sync-overlay" style="display:none; position:absolute; inset:0; z-index:20; background:transparent;"></div>
+        <video id="playerVideo" playsinline></video>
+      </div>
 
-                  <button class="ctrl-btn" onclick="toggleFullscreen()" title="Fullscreen" style="margin-left:6px;">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="player-glow-bar"></div>
-          </div>
-
-          <div class="player-info-card">
-            <div class="player-top-row">
-              <h1 class="player-title" id="vTitle">Video Title</h1>
-              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn-action" style="background:var(--bg4); border:1px solid var(--border);" onclick="toggleDoubtPanel('doubtSidebar')">🔍 Doubts</button>
-                <button class="btn-action share" onclick="copyShareLink()">🔗 Share</button>
-                <button class="btn-action sync" onclick="startVaultLiveReview()">👥 Sync</button>
-                <button class="btn-purge" id="purgeBtn">✕ Purge</button>
-              </div>
-            </div>
-            
-            <div class="player-stats">
-              <div class="stat-chip views">
-                <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/></svg>
-                <span id="vViews">0 views</span>
-              </div>
-              <div class="stat-chip user">
-                <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
-                <span id="vUploader">beast</span>
-              </div>
-              <div class="stat-chip" id="vCatChip"></div>
-            </div>
-            <div class="player-divider"></div>
-            <div class="player-desc" id="vDesc">No description provided.</div>
-          </div>
-
-          <div class="thought-card">
-            <div class="thought-head">
-              <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-weight:900; font-size:12px; color:var(--p-glow);">📝 THOUGHT BOARD</span>
-                <span id="syncIndicator" style="font-family:'JetBrains Mono'; font-size:10px; color:var(--t3);">STATIONARY</span>
-              </div>
-              <button style="padding:6px 14px; background:#fff; border:none; border-radius:8px; font-size:11px; font-weight:900; cursor:pointer; color:#000;" onclick="exportThoughtsAsPDF()">💾 Export PDF</button>
-            </div>
-            <textarea id="thoughtArea" class="thought-area" placeholder="Write code, project notes, or thoughts here... Everyone in the room sees this live!"></textarea>
+      <div class="player-info-card">
+        <div class="player-top-row">
+          <h1 class="player-title" id="vTitle">Video Title</h1>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button id="liveReviewBtn" onclick="startVaultLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Call & Sync</button>
+            <button class="btn-purge" id="purgeBtn">✕ Purge</button>
           </div>
         </div>
-
-        <div class="player-side" id="doubtSidebar" style="display: none; width: 300px; flex-shrink: 0; position: sticky; top: calc(var(--nav-h) + 24px);">
-          <div class="thought-card" style="margin-top:0; border-color:var(--cyan);">
-            <div class="thought-head" style="background:rgba(245,158,11,0.1); border-bottom:1px solid rgba(245,158,11,0.2);">
-              <span style="font-weight:900; font-size:12px; color:var(--cyan);">🧠 BEAST AI SOLVER</span>
-              <button onclick="toggleDoubtPanel('doubtSidebar')" style="background:none; border:none; color:var(--t2); cursor:pointer; font-size:16px; line-height:1;">✕</button>
-            </div>
-            <div style="padding: 20px;">
-              <form onsubmit="askAI(event, 'vault')" style="display:flex; flex-direction:column; gap:12px;">
-                <label style="font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:1px;">Ask about this video</label>
-                <input type="text" id="aiDoubtInput_vault" class="field-input" placeholder="Type your doubt here..." required style="margin-top:0; border-color:rgba(245,158,11,0.3);">
-                <button type="submit" id="aiSubmitBtn_vault" class="btn-publish" style="padding:12px; font-size:13px; min-height:0; background:linear-gradient(135deg, var(--cyan), var(--orange)); box-shadow:0 4px 15px rgba(245,158,11,0.3);">🧠 ASK AI</button>
-              </form>
-              <div id="aiResultBox_vault" style="display:none; margin-top:16px; padding:12px; background:rgba(0,0,0,0.4); border:1px solid var(--border2); border-radius:8px; font-size:13px; color:var(--t1); line-height:1.6;">
-                </div>
-            </div>
-          </div>
+        <div class="player-stats">
+          <div class="stat-chip views"><span id="vViews">0 views</span></div>
+          <div class="stat-chip user"><span id="vUploader">beast</span></div>
+          <div class="stat-chip" id="vCatChip"></div>
         </div>
+        <div class="player-divider"></div>
+        <div class="player-desc" id="vDesc">No description provided.</div>
+      </div>
 
+      <div class="thought-card">
+        <div class="thought-head">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-weight:900; font-size:12px; color:var(--p-glow);">📝 THOUGHT BOARD</span>
+            <span id="syncIndicator" style="font-family:'JetBrains Mono'; font-size:10px; color:var(--t3);">STATIONARY</span>
+          </div>
+          <button style="padding:6px 14px; background:#fff; border:none; border-radius:8px; font-size:11px; font-weight:900; cursor:pointer; color:#000;" onclick="exportThoughtsAsPDF()">💾 Export PDF</button>
+        </div>
+        <textarea id="thoughtArea" class="thought-area" placeholder="Write code, project notes, or thoughts here... Everyone in the room sees this live!"></textarea>
       </div>
     </div>
   </div>
@@ -567,7 +472,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
             <div class="player-top-row">
               <h1 class="player-title" id="ytViewTitle">YouTube Video</h1>
               <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <button class="btn-action" style="background:var(--bg4); border:1px solid var(--border);" onclick="toggleDoubtPanel('ytDoubtSidebar')">🔍 Doubts</button>
+                <button class="btn-action" style="background:var(--bg4); border:1px solid var(--border);" onclick="toggleDoubtPanel()">🔍 Doubts</button>
                 <button id="ytLiveBtn" onclick="startYTLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Call & Sync</button>
                 <button class="btn-purge" onclick="closeYTPlayer()">✕ Close YouTube</button>
               </div>
@@ -577,20 +482,21 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
           </div>
         </div>
 
-        <div class="player-side" id="ytDoubtSidebar" style="display: none; width: 300px; flex-shrink: 0; position: sticky; top: calc(var(--nav-h) + 24px);">
+        <div class="player-side" id="doubtSidebar" style="display: none; width: 300px; flex-shrink: 0; position: sticky; top: calc(var(--nav-h) + 24px);">
           <div class="thought-card" style="margin-top:0; border-color:var(--cyan);">
             <div class="thought-head" style="background:rgba(245,158,11,0.1); border-bottom:1px solid rgba(245,158,11,0.2);">
-              <span style="font-weight:900; font-size:12px; color:var(--cyan);">🧠 BEAST AI SOLVER</span>
-              <button onclick="toggleDoubtPanel('ytDoubtSidebar')" style="background:none; border:none; color:var(--t2); cursor:pointer; font-size:16px; line-height:1;">✕</button>
+              <span style="font-weight:900; font-size:12px; color:var(--cyan);">🔍 DOUBT SOLVER</span>
+              <button onclick="toggleDoubtPanel()" style="background:none; border:none; color:var(--t2); cursor:pointer; font-size:16px; line-height:1;">✕</button>
             </div>
             <div style="padding: 20px;">
-              <form onsubmit="askAI(event, 'yt')" style="display:flex; flex-direction:column; gap:12px;">
-                <label style="font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:1px;">Ask about this video</label>
-                <input type="text" id="aiDoubtInput_yt" class="field-input" placeholder="Type your doubt here..." required style="margin-top:0; border-color:rgba(245,158,11,0.3);">
-                <button type="submit" id="aiSubmitBtn_yt" class="btn-publish" style="padding:12px; font-size:13px; min-height:0; background:linear-gradient(135deg, var(--cyan), var(--orange)); box-shadow:0 4px 15px rgba(245,158,11,0.3);">🧠 ASK AI</button>
+              <form action="https://www.google.com/search" method="get" target="_blank" style="display:flex; flex-direction:column; gap:12px;">
+                <label style="font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:1px;">Search Google</label>
+                <input type="text" name="q" class="field-input" placeholder="Type your doubt here..." required style="margin-top:0; border-color:rgba(245,158,11,0.3);">
+                <button type="submit" class="btn-publish" style="padding:12px; font-size:13px; min-height:0; background:linear-gradient(135deg, var(--cyan), var(--orange)); box-shadow:0 4px 15px rgba(245,158,11,0.3);">🔍 GOOGLE IT</button>
               </form>
-              <div id="aiResultBox_yt" style="display:none; margin-top:16px; padding:12px; background:rgba(0,0,0,0.4); border:1px solid var(--border2); border-radius:8px; font-size:13px; color:var(--t1); line-height:1.6;">
-                </div>
+              <div style="margin-top:16px; font-size:12px; color:var(--t3); line-height:1.5;">
+                <strong style="color:var(--t2);">Tip:</strong> Opens in a new tab so your video keeps playing seamlessly in the background.
+              </div>
             </div>
           </div>
         </div>
@@ -712,9 +618,9 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Home</span>
     </button>
-    <button class="mob-nav-btn" onclick="showPage('home');setTimeout(()=>document.getElementById('searchInput').focus(),300)">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <span>Search</span>
+    <button class="mob-nav-btn" onclick="showPage('yt-hub')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-10 12.5v-9l6 4.5-6 4.5z"/></svg>
+      <span>Explore</span>
     </button>
     <button class="mob-nav-btn upload-btn" onclick="showPage('upload')">
       <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -730,21 +636,30 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   </div>
 </nav>
 
-<div class="toast" id="toast"></div>
-
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 const API = 'https://beastvault-backend.onrender.com/api';
+const socket = io(API.replace('/api', ''));
 let allVideos = [], hlsInst = null, currentTheme = 'dark';
 let ytPrivacy = 'public';
 let currentUser = null;
 let currentVideoId = null;
 let currentYTVideoId = null;
+let ytPlayer = null; 
+
+/* ══ DOUBT PANEL TOGGLE ══ */
+function toggleDoubtPanel() {
+  const panel = document.getElementById('doubtSidebar');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
 
 /* ══ AUTH ══ */
 let authMode = 'login';
-
 function openAuthModal() {
   if (currentUser) {
     if (confirm('Sign out of BeastVault?')) {
@@ -763,7 +678,6 @@ function openAuthModal() {
   switchAuthTab('login');
 }
 function closeAuthModal() { document.getElementById('authModal').classList.remove('show'); }
-
 function switchAuthTab(mode) {
   authMode = mode;
   document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
@@ -772,21 +686,17 @@ function switchAuthTab(mode) {
   document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
   document.getElementById('authErr').classList.remove('show');
 }
-
 async function submitAuth() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
   const username = document.getElementById('authUsername').value.trim();
   const errEl = document.getElementById('authErr');
   const btn = document.getElementById('authSubmitBtn');
-
   if (!email || !password) { showAuthErr('Email and password are required'); return; }
   if (authMode === 'register' && !username) { showAuthErr('Username is required'); return; }
-
   btn.disabled = true;
   btn.textContent = authMode === 'login' ? 'Signing in...' : 'Creating account...';
   errEl.classList.remove('show');
-
   try {
     const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
     const body = authMode === 'login' ? { email, password } : { username, email, password };
@@ -813,12 +723,10 @@ async function submitAuth() {
     btn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
   }
 }
-
 function showAuthErr(msg) {
   const el = document.getElementById('authErr');
   el.textContent = msg; el.classList.add('show');
 }
-
 function updateAuthUI() {
   const label = document.getElementById('navAuthLabel');
   const mobLabel = document.getElementById('mobAuthLabel');
@@ -826,7 +734,6 @@ function updateAuthUI() {
   const commentSubmit = document.getElementById('commentSubmitBtn');
   const commentInput = document.getElementById('commentInput');
   const avatar = document.getElementById('commentAvatar');
-
   if (currentUser) {
     const initials = (currentUser.username || 'U').substring(0, 2).toUpperCase();
     label.textContent = initials;
@@ -843,75 +750,6 @@ function updateAuthUI() {
     if (commentInput) commentInput.placeholder = 'Add a comment... (sign in to post)';
     if (avatar) avatar.textContent = '?';
   }
-}
-
-/* ══ NATIVE BEAST AI DOUBT SOLVER ══ */
-function toggleDoubtPanel(panelId = 'doubtSidebar') {
-  const panel = document.getElementById(panelId);
-  if(!panel) return;
-  if (panel.style.display === 'none') {
-    panel.style.display = 'block';
-  } else {
-    panel.style.display = 'none';
-  }
-}
-
-async function askAI(e, type) {
-  e.preventDefault();
-  const input = document.getElementById('aiDoubtInput_' + type);
-  const btn = document.getElementById('aiSubmitBtn_' + type);
-  const resultBox = document.getElementById('aiResultBox_' + type);
-  const query = input.value.trim();
-  if(!query) return;
-
-  let contextTitle = "";
-  if (type === 'vault') contextTitle = document.getElementById('vTitle').textContent;
-  if (type === 'yt') contextTitle = document.getElementById('ytViewTitle').textContent;
-
-  btn.disabled = true;
-  btn.innerHTML = "⏳ THINKING...";
-  resultBox.style.display = 'block';
-  resultBox.innerHTML = '<span style="color:var(--cyan);">Analyzing your doubt based on the video context...</span>';
-
-  try {
-    const r = await fetch(API + '/ai/solve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
-      body: JSON.stringify({ query: query, context: contextTitle })
-    });
-    
-    if(r.ok) {
-      const d = await r.json();
-      typeWriterAI(d.answer || "I couldn't find a specific answer, but I'm learning every day!", resultBox);
-    } else {
-      setTimeout(() => {
-        const simResponse = `Here is what I found regarding "${query}": In the context of "${contextTitle}", this usually relates to the foundational principles discussed in the video. Let me know if you need a deeper breakdown!`;
-        typeWriterAI(simResponse, resultBox);
-      }, 1500);
-    }
-  } catch(err) {
-      setTimeout(() => {
-        const simResponse = `Here is what I found regarding "${query}": In the context of "${contextTitle}", this usually relates to the foundational principles discussed in the video. Let me know if you need a deeper breakdown!`;
-        typeWriterAI(simResponse, resultBox);
-      }, 1500);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "🧠 ASK AI";
-    input.value = '';
-  }
-}
-
-function typeWriterAI(text, element) {
-  element.innerHTML = '';
-  let i = 0;
-  function type() {
-    if (i < text.length) {
-      element.innerHTML += text.charAt(i);
-      i++;
-      setTimeout(type, 20); 
-    }
-  }
-  type();
 }
 
 /* ══ THEME ══ */
@@ -959,7 +797,7 @@ function showPage(id) {
     if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
   }
   if (id !== 'yt-player') {
-    if (ytPlayer) ytPlayer.stopVideo();
+    if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1033,6 +871,9 @@ async function openPlayer(id) {
   currentVideoId = id;
   showPage('player');
   recView(id);
+  
+  const vid = document.getElementById('playerVideo');
+  
   document.getElementById('vTitle').textContent = v.title;
   document.getElementById('vViews').textContent = ((v.views||0)+1) + ' views';
   document.getElementById('vUploader').textContent = v.uploader || 'beast';
@@ -1047,12 +888,11 @@ async function openPlayer(id) {
     hlsInst = new Hls();
     hlsInst.loadSource(v.hls_url);
     hlsInst.attachMedia(vid);
-    hlsInst.on(Hls.Events.MANIFEST_PARSED, () => { vid.play(); if(playIcon) playIcon.setAttribute('d', SVG_PAUSE); });
+    hlsInst.on(Hls.Events.MANIFEST_PARSED, () => { vid.play(); });
   } else {
     vid.src = v.hls_url; vid.load();
-    vid.play().then(() => { if(playIcon) playIcon.setAttribute('d', SVG_PAUSE); }).catch(()=>{});
+    vid.play().catch(()=>{});
   }
-  fetchComments(id);
 }
 
 async function deleteVideo(id) {
@@ -1061,63 +901,6 @@ async function deleteVideo(id) {
     const r = await fetch(API + '/videos/' + id, { method: 'DELETE', headers: { 'Bypass-Tunnel-Reminder': 'true' } });
     if (r.ok) { showToast('🗑️ Video purged.'); showPage('home'); }
   } catch(e) { showToast('❌ Delete failed'); }
-}
-
-/* ══ COMMENTS ══ */
-async function fetchComments(videoId) {
-  const list = document.getElementById('commentList');
-  const countEl = document.getElementById('commentCount');
-  try {
-    const r = await fetch(API + '/videos/' + videoId + '/comments', { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    const comments = d.comments || [];
-    if (countEl) countEl.textContent = comments.length;
-    if (!comments.length) { list.innerHTML = '<div class="comment-empty">No comments yet. Be the first!</div>'; return; }
-    list.innerHTML = comments.map(c => `
-      <div class="comment-item">
-        <div class="comment-avatar">${(c.username || 'U').substring(0,2).toUpperCase()}</div>
-        <div class="comment-body">
-          <div class="comment-user">${c.username || 'beast'}</div>
-          <div class="comment-text">${escapeHtml(c.content)}</div>
-          <div class="comment-time">${timeAgo(c.created_at)}</div>
-        </div>
-      </div>`).join('');
-  } catch(e) {
-    list.innerHTML = '<div class="comment-empty">Comments unavailable</div>';
-  }
-}
-
-async function postComment() {
-  if (!currentUser) { openAuthModal(); return; }
-  const input = document.getElementById('commentInput');
-  const content = input.value.trim();
-  if (!content) return;
-  try {
-    const headers = { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' };
-    if (currentUser.token) headers['Authorization'] = 'Bearer ' + currentUser.token;
-    const r = await fetch(API + '/videos/' + currentVideoId + '/comments', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ content, username: currentUser.username })
-    });
-    if (r.ok) {
-      input.value = '';
-      fetchComments(currentVideoId);
-      showToast('Comment posted!');
-    } else { showToast('❌ Failed to post comment'); }
-  } catch(e) { showToast('❌ Network error'); }
-}
-
-function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr), now = new Date();
-  const diff = Math.floor((now - d) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-  return Math.floor(diff/86400) + 'd ago';
 }
 
 /* ══ UPLOAD ══ */
@@ -1150,66 +933,7 @@ async function publishVideo() {
   finally { btn.textContent = '⚡ PUBLISH TO VAULT'; btn.disabled = false; }
 }
 
-/* ══ PLAYER CONTROLS ══ */
-const vid = document.getElementById('playerVideo');
-const pBar = document.getElementById('progressBar');
-const cTime = document.getElementById('currentTime');
-const tTime = document.getElementById('totalTime');
-const playIcon = document.getElementById('playIcon');
-const customControls = document.getElementById('customControls');
-const vidContainer = document.getElementById('videoContainer');
-let controlTimeout;
-const SVG_PLAY = 'M8 5v14l11-7z';
-const SVG_PAUSE = 'M6 19h4V5H6v14zm8-14v14h4V5h-4z';
-
-function togglePlay() {
-  if (vid.paused) { vid.play(); playIcon.setAttribute('d', SVG_PAUSE); }
-  else { vid.pause(); playIcon.setAttribute('d', SVG_PLAY); }
-}
-function skip(s) { vid.currentTime += s; }
-function changeVolume(v) { vid.volume = v; }
-function formatTime(s) { if(isNaN(s)) return "00:00"; let m=Math.floor(s/60),sec=Math.floor(s%60); return (m<10?'0'+m:m)+':'+(sec<10?'0'+sec:sec); }
-
-vid.addEventListener('timeupdate', () => {
-  if (!vid.duration) return;
-  pBar.style.width = (vid.currentTime / vid.duration * 100) + '%';
-  cTime.textContent = formatTime(vid.currentTime);
-});
-vid.addEventListener('loadedmetadata', () => { tTime.textContent = formatTime(vid.duration); });
-vid.addEventListener('ended', () => { playIcon.setAttribute('d', SVG_PLAY); });
-
-function seekVideo(e) {
-  const area = document.getElementById('progressArea');
-  const rect = area.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  vid.currentTime = ((clientX - rect.left) / rect.width) * vid.duration;
-}
-
-function toggleFullscreen() {
-  if (!document.fullscreenElement) vidContainer.requestFullscreen().catch(()=>{});
-  else document.exitFullscreen();
-}
-
-async function togglePiP() {
-  try {
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture();
-    } else if (document.pictureInPictureEnabled) {
-      await vid.requestPictureInPicture();
-    }
-  } catch(err) { showToast('PiP not supported on this device'); }
-}
-
-vidContainer.addEventListener('mousemove', () => {
-  customControls.style.opacity = '1'; vidContainer.style.cursor = 'default';
-  clearTimeout(controlTimeout);
-  controlTimeout = setTimeout(() => { if (!vid.paused) { customControls.style.opacity = '0'; vidContainer.style.cursor = 'none'; } }, 2500);
-});
-vidContainer.addEventListener('mouseleave', () => { if (!vid.paused) customControls.style.opacity = '0'; });
-
 /* ══ YOUTUBE HUB ══ */
-let ytPlayer;
-
 function onYouTubeIframeAPIReady() {
   console.log("YouTube API Ready");
 }
@@ -1264,6 +988,8 @@ function playYT(id, title) {
   const titleEl = document.getElementById('ytViewTitle');
   if (titleEl && title) titleEl.textContent = title;
   
+  document.getElementById('doubtSidebar').style.display = 'block';
+
   if (!ytPlayer) {
     ytPlayer = new YT.Player('ytFrame', {
       videoId: id,
@@ -1277,7 +1003,7 @@ function playYT(id, title) {
 }
 
 function closeYTPlayer() { 
-  if(ytPlayer) ytPlayer.stopVideo(); 
+  if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo(); 
   showPage('yt-hub');
 }
 
@@ -1356,7 +1082,6 @@ async function publishToYouTube() {
 /* ═══════════════════════════════════════════════
    REAL-TIME SYNC & WEBRTC ENGINE (Figma for Video)
 ═══════════════════════════════════════════════ */
-const socket = io(API.replace('/api', '')); 
 let currentRoom = null;
 let isRemoteAction = false; 
 let hasRemote = true; 
@@ -1371,26 +1096,22 @@ const rtcConfig = {
   ] 
 }; 
 
-// Mute & Cam Logic
-let isMicMuted = false;
-let isCamOff = false;
-
 function toggleMic() {
   if (!localStream) return;
-  isMicMuted = !isMicMuted;
-  localStream.getAudioTracks().forEach(t => t.enabled = !isMicMuted);
+  let isMicMuted = !localStream.getAudioTracks()[0].enabled;
+  localStream.getAudioTracks().forEach(t => t.enabled = isMicMuted);
   const btn = document.getElementById('btnMuteMic');
-  btn.classList.toggle('disabled', isMicMuted);
-  btn.innerHTML = isMicMuted ? '🔇' : '🎤';
+  btn.classList.toggle('disabled', !isMicMuted);
+  btn.innerHTML = !isMicMuted ? '🔇' : '🎤';
 }
 
 function toggleCam() {
   if (!localStream) return;
-  isCamOff = !isCamOff;
-  localStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
+  let isCamOff = !localStream.getVideoTracks()[0].enabled;
+  localStream.getVideoTracks().forEach(t => t.enabled = isCamOff);
   const btn = document.getElementById('btnMuteCam');
-  btn.classList.toggle('disabled', isCamOff);
-  btn.innerHTML = isCamOff ? '🚫' : '📷';
+  btn.classList.toggle('disabled', !isCamOff);
+  btn.innerHTML = !isCamOff ? '🚫' : '📷';
 }
 
 async function startWebcams() {
@@ -1418,45 +1139,7 @@ function endCall() {
   }
   currentRoom = null;
   
-  document.querySelectorAll('.sync-overlay').forEach(o => o.style.display = 'none');
-  document.getElementById('btnRemote').style.display = 'none';
-  
   showToast('Call ended 📞');
-  
-  const lb = document.getElementById('liveReviewBtn');
-  if (lb) lb.innerHTML = '👥 Live Call & Sync';
-  const ytb = document.getElementById('ytLiveBtn');
-  if (ytb) ytb.innerHTML = '👥 Live Call & Sync';
-}
-
-function updateRemoteUI() {
-  const btn = document.getElementById('btnRemote');
-  if (!btn) return;
-  btn.style.display = 'flex'; 
-  
-  const overlays = document.querySelectorAll('.sync-overlay');
-  
-  if (hasRemote) {
-    btn.innerHTML = '🎮';
-    btn.title = 'You have the Remote';
-    btn.style.background = 'rgba(16,185,129,0.8)'; 
-    overlays.forEach(o => o.style.display = 'none'); 
-  } else {
-    btn.innerHTML = '📺';
-    btn.title = 'Take Remote';
-    btn.style.background = 'rgba(0,0,0,0.6)'; 
-    overlays.forEach(o => o.style.display = 'block'); 
-  }
-}
-
-function takeRemote() {
-  if (hasRemote) return; 
-  hasRemote = true;
-  updateRemoteUI();
-  showToast('🎮 You took the remote!');
-  if (currentRoom) {
-    socket.emit('video-action', { room: currentRoom, action: 'take-remote' });
-  }
 }
 
 function createPeerConnection() {
@@ -1484,28 +1167,22 @@ async function startVaultLiveReview() {
   if (!currentVideoId) return;
   currentRoom = Math.random().toString(36).substring(2, 9); 
   hasRemote = true; 
-  updateRemoteUI();
   const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}&room=${currentRoom}`;
   navigator.clipboard.writeText(link);
   showToast('🔗 Invite Link Copied! Send to client.');
   await startWebcams();
   socket.emit('join-room', currentRoom);
-  const btn = document.getElementById('liveReviewBtn');
-  if(btn) btn.innerHTML = '🟢 Room Active';
 }
 
 async function startYTLiveReview() {
   if (!currentYTVideoId) return;
   currentRoom = Math.random().toString(36).substring(2, 9); 
   hasRemote = true; 
-  updateRemoteUI();
   const link = `${window.location.origin}${window.location.pathname}?ytvideo=${currentYTVideoId}&room=${currentRoom}`;
   navigator.clipboard.writeText(link);
   showToast('🔗 YouTube Invite Link Copied!');
   await startWebcams();
   socket.emit('join-room', currentRoom);
-  const btn = document.getElementById('ytLiveBtn');
-  if(btn) btn.innerHTML = '🟢 Room Active';
 }
 
 socket.on('user-joined', async () => {
@@ -1535,9 +1212,12 @@ socket.on('webrtc-ice-candidate', async (candidate) => {
   catch(e) { console.error('ICE error', e); }
 });
 
-vid.addEventListener('play', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', player: 'vault', time: vid.currentTime }); });
-vid.addEventListener('pause', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', player: 'vault', time: vid.currentTime }); });
-vid.addEventListener('seeked', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', player: 'vault', time: vid.currentTime }); });
+const playerVidNode = document.getElementById('playerVideo');
+if(playerVidNode) {
+    playerVidNode.addEventListener('play', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', player: 'vault', time: playerVidNode.currentTime }); });
+    playerVidNode.addEventListener('pause', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', player: 'vault', time: playerVidNode.currentTime }); });
+    playerVidNode.addEventListener('seeked', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', player: 'vault', time: playerVidNode.currentTime }); });
+}
 
 function onYTStateChange(event) {
   if (hasRemote && !isRemoteAction && currentRoom) {
@@ -1550,13 +1230,6 @@ function onYTStateChange(event) {
 }
 
 socket.on('video-action', (data) => {
-  if (data.action === 'take-remote') {
-    hasRemote = false;
-    updateRemoteUI();
-    showToast('📺 Someone else took the remote');
-    return;
-  }
-
   isRemoteAction = true; 
   clearTimeout(window.syncTimeout);
 
@@ -1571,20 +1244,21 @@ socket.on('video-action', (data) => {
       showToast('⏸ Remote Pause'); 
     }
   } else {
-    if (data.action === 'seek' || data.action === 'play' || data.action === 'pause') {
-      if (Math.abs(vid.currentTime - data.time) > 1.0) {
-        vid.currentTime = data.time;
-      }
-    }
-    if (data.action === 'play') { 
-      vid.play().catch(e=>{}); 
-      playIcon.setAttribute('d', SVG_PAUSE); 
-      showToast('▶ Remote Play'); 
-    }
-    else if (data.action === 'pause') { 
-      vid.pause(); 
-      playIcon.setAttribute('d', SVG_PLAY); 
-      showToast('⏸ Remote Pause'); 
+    const localVid = document.getElementById('playerVideo');
+    if(localVid) {
+        if (data.action === 'seek' || data.action === 'play' || data.action === 'pause') {
+          if (Math.abs(localVid.currentTime - data.time) > 1.0) {
+            localVid.currentTime = data.time;
+          }
+        }
+        if (data.action === 'play') { 
+          localVid.play().catch(e=>{}); 
+          showToast('▶ Remote Play'); 
+        }
+        else if (data.action === 'pause') { 
+          localVid.pause(); 
+          showToast('⏸ Remote Pause'); 
+        }
     }
   }
   
@@ -1608,7 +1282,6 @@ function startDrag(e) {
   isDragging = true;
   dragX = localX;
   dragY = localY;
-
   if (e.type === 'touchstart') document.body.style.overflow = 'hidden';
 }
 
@@ -1629,7 +1302,6 @@ function endDrag(e) {
 camBox.addEventListener('mousedown', startDrag);
 document.addEventListener('mousemove', moveDrag);
 document.addEventListener('mouseup', endDrag);
-
 camBox.addEventListener('touchstart', startDrag, {passive: false});
 document.addEventListener('touchmove', moveDrag, {passive: false});
 document.addEventListener('touchend', endDrag);
@@ -1650,20 +1322,14 @@ async function boot() {
     currentRoom = sharedRoom;
     socket.emit('join-room', currentRoom);
     startWebcams();
-    
     hasRemote = false; 
-    updateRemoteUI();
     
     if (sharedVideo) {
       openPlayer(sharedVideo);
-      const btn = document.getElementById('liveReviewBtn');
-      if(btn) btn.innerHTML = '🟢 Room Active';
       showToast('Joined Live Review Room!');
     } else if (sharedYTVideo) {
       setTimeout(() => {
         playYT(sharedYTVideo, 'Live Shared Video');
-        const btn = document.getElementById('ytLiveBtn');
-        if(btn) btn.innerHTML = '🟢 Room Active';
         showToast('Joined YouTube Watch Party!');
       }, 1000);
     }
