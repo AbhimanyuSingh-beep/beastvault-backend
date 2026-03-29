@@ -267,6 +267,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 }
 .remote-video{width:100%; height:100%; display:block; object-fit:cover; background:#111; transform:scaleX(-1); pointer-events:none;}
 .local-video{width:30%; position:absolute; bottom:8px; right:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.3); background:#000; transform:scaleX(-1); box-shadow:0 4px 12px rgba(0,0,0,0.5); pointer-events:none;}
+#ytFrame { width:100%; height:100%; border:none; display:block; }
 
 /* RESPONSIVE */
 @media(max-width:768px){
@@ -316,6 +317,8 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 <div class="top-stripe"></div>
 
 <div id="webcamContainer" class="webcam-container">
+  <button onclick="endCall()" style="position:absolute; top:8px; left:8px; background:rgba(225,29,72,0.9); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 10px; border-radius:4px; font-size:11px; font-weight:800; cursor:pointer; z-index:10; font-family:'JetBrains Mono', monospace;">✕ END CALL</button>
+  
   <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
   <video id="localVideo" class="local-video" autoplay playsinline muted></video>
 </div>
@@ -484,6 +487,26 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
     </div>
   </div>
 
+  <div id="page-yt-player" class="page">
+    <div class="player-wrap">
+      <div class="player-shell" style="background:#000;">
+        <div id="ytFrame"></div>
+      </div>
+
+      <div class="player-info-card">
+        <div class="player-top-row">
+          <h1 class="player-title" id="ytViewTitle">YouTube Video</h1>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button id="ytLiveBtn" onclick="startYTLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Call & Sync</button>
+            <button class="btn-purge" onclick="closeYTPlayer()">✕ Close YouTube</button>
+          </div>
+        </div>
+        <div class="player-divider"></div>
+        <div class="player-desc">Streaming securely from YouTube's server network. Adjust volume inside the player window.</div>
+      </div>
+    </div>
+  </div>
+
   <div id="page-upload" class="page">
     <div class="upload-wrap">
       <div class="upload-hero">
@@ -602,17 +625,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   </div>
 
 </main>
-
-<div id="ytModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;align-items:center;justify-content:center;padding:16px;">
-  <div style="width:100%;max-width:1200px;aspect-ratio:16/9;position:relative;border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(225,29,72,0.15);border:1px solid rgba(225,29,72,0.35);background:#000;">
-    <div style="position:absolute; top:14px; left:14px; z-index:1001; display:flex; gap:10px;">
-      <button id="ytLiveBtn" onclick="startYTLiveReview()" style="padding:10px 16px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-md); color:#fff; font-weight:800; cursor:pointer; font-size:12px;">👥 Live Call & Sync</button>
-    </div>
-    <button onclick="closeYTPlayer()" style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:44px;height:44px;color:white;font-size:20px;cursor:pointer;z-index:1000;display:flex;align-items:center;justify-content:center;">✕</button>
-    
-    <div id="ytFrame" style="width:100%; height:100%;"></div>
-  </div>
-</div>
 
 <nav class="mob-nav">
   <div class="mob-nav-inner">
@@ -792,11 +804,16 @@ function showPage(id) {
   if (id === 'yt-hub') { document.getElementById('sbar-yt-hub')?.classList.add('active'); fetchYTTrending(); }
   if (id === 'youtube') { document.getElementById('sbar-yt')?.classList.add('active'); checkYouTubeStatus(); populateYTVideoSelect(); }
   
+  // Clean up existing players if switching pages
   if (id !== 'player') {
     const v = document.getElementById('playerVideo');
     if (v) { v.pause(); v.src = ''; }
     if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
   }
+  if (id !== 'yt-player') {
+    if (ytPlayer) ytPlayer.stopVideo();
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1064,8 +1081,10 @@ async function fetchYTTrending() {
 function renderYTGrid(vids) {
   const g = document.getElementById('ytGrid');
   if(!vids||!vids.length) { g.innerHTML = `<div class="empty">No results found.</div>`; return; }
+  
+  // Escaping the title for inline javascript call to prevent breaking quotes
   g.innerHTML = vids.map(v => `
-    <div class="vcard" onclick="playYT('${v.videoId}')">
+    <div class="vcard" onclick="playYT('${v.videoId}', \`${(v.title || '').replace(/`/g, "'")}\`)">
       <div class="vcard-thumb">
         <img src="${v.thumbnail}" loading="lazy">
         <div class="vcard-play"><div class="play-ring">▶</div></div>
@@ -1081,9 +1100,13 @@ function renderYTGrid(vids) {
     </div>`).join('');
 }
 
-function playYT(id) {
+// Rewritten to use standard Page View
+function playYT(id, title) {
   currentYTVideoId = id;
-  document.getElementById('ytModal').style.display = 'flex';
+  showPage('yt-player');
+  
+  const titleEl = document.getElementById('ytViewTitle');
+  if (titleEl && title) titleEl.textContent = title;
   
   if (!ytPlayer) {
     ytPlayer = new YT.Player('ytFrame', {
@@ -1097,8 +1120,8 @@ function playYT(id) {
 }
 
 function closeYTPlayer() { 
-  document.getElementById('ytModal').style.display = 'none'; 
   if(ytPlayer) ytPlayer.stopVideo(); 
+  showPage('yt-hub');
 }
 
 /* ══ YOUTUBE SHORTS PUBLISH ══ */
@@ -1203,6 +1226,27 @@ async function startWebcams() {
     showToast('⚠️ Camera/Mic access denied');
     console.error(e);
   }
+}
+
+// End the Call / Kill Webcams
+function endCall() {
+  document.getElementById('webcamContainer').style.display = 'none';
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
+  if (peerConnection) {
+    peerConnection.close();
+    peerConnection = null;
+  }
+  currentRoom = null;
+  showToast('Call ended 📞');
+  
+  // Reset buttons
+  const lb = document.getElementById('liveReviewBtn');
+  if (lb) lb.innerHTML = '👥 Live Call & Sync';
+  const ytb = document.getElementById('ytLiveBtn');
+  if (ytb) ytb.innerHTML = '👥 Live Call & Sync';
 }
 
 // 2. Setup the Peer Connection
@@ -1370,7 +1414,7 @@ async function boot() {
     } else if (sharedYTVideo) {
       // Small delay to ensure YT API is fully loaded
       setTimeout(() => {
-        playYT(sharedYTVideo);
+        playYT(sharedYTVideo, 'Live Shared Video');
         const btn = document.getElementById('ytLiveBtn');
         if(btn) btn.innerHTML = '🟢 Room Active';
         showToast('Joined YouTube Watch Party!');
