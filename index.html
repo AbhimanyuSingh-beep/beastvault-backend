@@ -335,14 +335,6 @@ input, textarea, select { font-family: inherit; }
   backdrop-filter: blur(4px);
 }
 
-.vcard-duration {
-  position: absolute; bottom: 10px; right: 10px;
-  background: rgba(3,5,15,0.85);
-  color: var(--t1); font-size: 11px; font-weight: 700;
-  padding: 2px 7px; border-radius: 5px;
-  font-family: 'JetBrains Mono', monospace;
-}
-
 .vcard-play {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -474,7 +466,9 @@ input, textarea, select { font-family: inherit; }
 .player-divider { height: 1px; background: var(--border); margin: 16px 0; }
 .player-desc { font-size: 14px; color: var(--t2); line-height: 1.75; }
 
-/* --- PRO THOUGHT BOARD --- */
+/* ═══════════════════════════════════════════════
+   THOUGHT BOARD
+═══════════════════════════════════════════════ */
 .thought-card { margin-top: 24px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r-md); overflow: hidden; }
 .thought-head { background: var(--bg4); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
 .thought-area { width: 100%; min-height: 250px; background: transparent; color: var(--green); font-family: 'JetBrains Mono', monospace; padding: 20px; border: none; outline: none; font-size: 15px; line-height: 1.6; resize: vertical; }
@@ -560,7 +554,7 @@ input, textarea, select { font-family: inherit; }
 .webcam-container { display: none; position: fixed; bottom: 80px; right: 20px; width: 300px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; overflow: hidden; z-index: 9999; box-shadow: 0 20px 50px rgba(0,0,0,0.6); cursor: grab; }
 .webcam-container:active { cursor: grabbing; }
 .webcam-head { padding: 10px 15px; background: var(--p); display: flex; justify-content: space-between; color: #fff; font-weight: 900; font-size: 11px; pointer-events: none; }
-.webcam-head span { pointer-events: auto; } /* Allow clicking close */
+.webcam-head span { pointer-events: auto; }
 
 /* ═══════════════════════════════════════════════
    MOBILE RESPONSIVE
@@ -569,36 +563,30 @@ input, textarea, select { font-family: inherit; }
   .sidebar { display: none; }
   .mob-nav { display: block; }
   .main { margin-left: 0; padding-bottom: var(--mob-nav); }
-
   .topnav { padding: 0 12px; gap: 8px; }
   .topnav-logo { font-size: 18px; }
   .topnav-search { max-width: none; }
   .btn-cta { display: none; }
-
   .home-wrap { padding: 16px 14px 24px; }
   .vgrid { grid-template-columns: 1fr; gap: 14px; }
-  
   .vcard { display: flex; border-radius: var(--r-md); }
   .vcard-thumb { width: 140px; flex-shrink: 0; aspect-ratio: 16/9; border-radius: 0; height: auto; }
   .vcard-body { padding: 12px; flex: 1; min-width: 0; }
   .vcard-title { font-size: 14px; }
   .vcard-play { display: none; }
-
   .player-wrap { padding: 0; }
   .player-shell { border-radius: 0; border-left: none; border-right: none; }
   .player-info-card { border-radius: 0; border-left: none; border-right: none; margin-top: 0; }
   .player-title { font-size: 18px; }
   .player-top-row { flex-direction: column; }
-
   .upload-wrap { padding: 16px 14px 80px; }
   .upload-grid { grid-template-columns: 1fr; }
   .upload-hero h1 { font-size: 26px; }
-
   .cat-pill { font-size: 12px; padding: 6px 14px; }
   .section-title { font-size: 16px; }
-  
   .webcam-container { width: 220px; bottom: 100px; right: 10px; }
 }
+
 @media (max-width: 480px) { .vcard-thumb { width: 120px; } }
 @media (min-width: 769px) { .mob-nav { display: none; } }
 </style>
@@ -925,7 +913,6 @@ input, textarea, select { font-family: inherit; }
 
 <div class="toast" id="toast"></div>
 
-
 <script>
 const API = 'https://beastvault-backend.onrender.com/api';
 const socket = io(API.replace('/api', ''));
@@ -996,16 +983,20 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sbar-item').forEach(i => i.classList.remove('active'));
   document.querySelectorAll('.mob-nav-btn').forEach(i => i.classList.remove('active'));
+  
   document.getElementById('page-' + id).classList.add('active');
-  const sbar = document.getElementById('sbar-' + id); if(sbar) sbar.classList.add('active');
+  const sbar = document.getElementById('sbar-' + id);
+  if(sbar) sbar.classList.add('active');
   
   if (id === 'home') fetchVideos();
   if (id === 'yt-hub') fetchYTTrending();
   if (id === 'youtube') { populateYTVideoSelect(); checkYTAuth(); }
   
   if (id !== 'player') {
-    const v = document.getElementById('playerVideo'); if (v) { v.pause(); v.src = ''; }
-    const yt = document.getElementById('ytIframe'); if(yt) { yt.src = ''; }
+    const v = document.getElementById('playerVideo');
+    if (v) { v.pause(); v.src = ''; }
+    const yt = document.getElementById('ytIframe');
+    if(yt) { yt.src = ''; }
     if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1019,7 +1010,9 @@ async function fetchVideos() {
     allVideos = d.videos || [];
     renderGrid(allVideos.filter(v => !v.is_private));
     updateStats();
-  } catch(e) { document.getElementById('mainGrid').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Vault offline</div></div>`; }
+  } catch(e) {
+    document.getElementById('mainGrid').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Vault offline</div><div class="empty-sub">Backend waking up — refresh in 30s</div></div>`;
+  }
 }
 
 function updateStats() {
@@ -1033,7 +1026,11 @@ function renderGrid(vids) {
   const g = document.getElementById('mainGrid');
   const cnt = document.getElementById('videoCount');
   if (cnt) cnt.textContent = vids.length + ' videos';
-  if (!vids.length) { g.innerHTML = `<div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Vault is empty</div></div>`; return; }
+
+  if (!vids.length) {
+    g.innerHTML = `<div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Vault is empty</div><div class="empty-sub">Hit ⚡ Unleash to add your first video</div></div>`;
+    return;
+  }
 
   g.innerHTML = vids.map(v => `
     <div class="vcard" onclick="openPlayer('${v.id}')">
@@ -1046,8 +1043,14 @@ function renderGrid(vids) {
       <div class="vcard-body">
         <div class="vcard-title">${v.title}</div>
         <div class="vcard-meta">
-          <div class="vcard-views"><svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/></svg>${fn(v.views||0)}</div>
-          <span style="color:var(--t4)">•</span><span>${v.uploader||'beast'}</span>
+          <div class="vcard-views">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10z" clip-rule="evenodd"/>
+            </svg>
+            ${fn(v.views||0)}
+          </div>
+          <span style="color:var(--t4)">•</span>
+          <span>${v.uploader||'beast'}</span>
           ${v.category ? `<div class="vcard-cat">${v.category}</div>` : ''}
         </div>
       </div>
@@ -1056,7 +1059,8 @@ function renderGrid(vids) {
 
 function filterCat(cat, el) {
   document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-  if (el) el.classList.add('active'); showPage('home');
+  if (el) el.classList.add('active');
+  showPage('home');
   const filtered = cat ? allVideos.filter(v => !v.is_private && v.category === cat) : allVideos.filter(v => !v.is_private);
   setTimeout(() => renderGrid(filtered), 50);
 }
@@ -1066,16 +1070,43 @@ document.getElementById('searchInput').oninput = e => {
   renderGrid(q ? allVideos.filter(v => !v.is_private && v.title.toLowerCase().includes(q)) : allVideos.filter(v => !v.is_private));
 };
 
-async function recView(id) { try { await fetch(API + '/videos/' + id + '/view', { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } }); } catch(e) {} }
+async function recView(id) {
+  try { await fetch(API + '/videos/' + id + '/view', { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } }); } catch(e) {}
+}
 
+/* THE CRASH FIX IS HERE */
 async function openPlayer(id) {
-  const v = allVideos.find(x => x.id === id);
-  if (!v) { try { const resp = await fetch(API + '/videos/' + id); const data = await resp.json(); if(data.video) { allVideos.push(data.video); return openPlayer(id); } } catch(e) { return; } }
+  let v = allVideos.find(x => x.id === id);
   
-  currentVideoId = id; showPage('player'); recView(id);
+  if (!v) { 
+    try { 
+      const resp = await fetch(API + '/videos/' + id); 
+      if (!resp.ok) throw new Error('Video not found or server error');
+      const data = await resp.json(); 
+      if (data.video) { 
+        allVideos.push(data.video); 
+        v = data.video;
+      } else {
+        throw new Error('Video data empty');
+      }
+    } catch(e) { 
+      showToast("❌ Video not found or server is down.");
+      showPage('home');
+      return; 
+    } 
+  }
+
+  // Double check so it NEVER crashes
+  if (!v) return;
+
+  currentVideoId = id; 
+  showPage('player');
+  recView(id);
   
-  document.getElementById('ytIframe').style.display = 'none'; document.getElementById('ytIframe').src = '';
-  const vid = document.getElementById('playerVideo'); vid.style.display = 'block';
+  document.getElementById('ytIframe').style.display = 'none';
+  document.getElementById('ytIframe').src = '';
+  const vid = document.getElementById('playerVideo');
+  vid.style.display = 'block';
 
   document.getElementById('vTitle').textContent = v.title;
   document.getElementById('vUploader').textContent = `@${v.uploader || 'beast'}`;
@@ -1087,71 +1118,137 @@ async function openPlayer(id) {
   if (!v.hls_url) return;
 
   if (v.hls_url.includes('.m3u8') && Hls.isSupported()) {
-    hlsInst = new Hls(); hlsInst.loadSource(v.hls_url); hlsInst.attachMedia(vid); hlsInst.on(Hls.Events.MANIFEST_PARSED, () => vid.play());
-  } else { vid.src = v.hls_url; vid.load(); vid.play().catch(()=>{}); }
+    hlsInst = new Hls();
+    hlsInst.loadSource(v.hls_url);
+    hlsInst.attachMedia(vid);
+    hlsInst.on(Hls.Events.MANIFEST_PARSED, () => vid.play());
+  } else {
+    vid.src = v.hls_url;
+    vid.load();
+    vid.play().catch(()=>{});
+  }
 }
 
 /* ══ YOUTUBE EXPLORER ══ */
-async function fetchYTTrending() { try { const r = await fetch(API + '/youtube/trending'); const d = await r.json(); if(d.videos) renderYTGrid(d.videos); } catch(e) {} }
-async function searchYouTube() {
-  const q = document.getElementById('ytSearchInput').value; if(!q) return;
-  try { const r = await fetch(`${API}/youtube/search?q=${encodeURIComponent(q)}`); const d = await r.json(); renderYTGrid(d.videos); } catch(e) { showToast("❌ Search failed"); }
+async function fetchYTTrending() {
+  try {
+    const r = await fetch(API + '/youtube/trending');
+    const d = await r.json();
+    if(d.videos) renderYTGrid(d.videos);
+  } catch(e) {}
 }
+
+async function searchYouTube() {
+  const q = document.getElementById('ytSearchInput').value;
+  if(!q) return;
+  try {
+    const r = await fetch(`${API}/youtube/search?q=${encodeURIComponent(q)}`);
+    const d = await r.json();
+    renderYTGrid(d.videos);
+  } catch(e) { showToast("❌ Search failed"); }
+}
+
 function renderYTGrid(vids) {
   const g = document.getElementById('ytGrid');
   g.innerHTML = vids.map(v => `
     <div class="vcard" onclick="playYT('${v.id || v.videoId}')">
-      <div class="vcard-thumb"><div class="vcard-overlay"></div><img src="${v.thumbnail}"><div class="vcard-play"><div class="play-ring" style="background:var(--yt-red);">▶</div></div></div>
-      <div class="vcard-body"><div class="vcard-title">${v.title}</div><div style="font-size: 11px; color: var(--yt-red); margin-top: 5px; font-weight: 800;">${v.channel}</div></div>
+      <div class="vcard-thumb">
+        <div class="vcard-overlay"></div>
+        <img src="${v.thumbnail}">
+        <div class="vcard-play"><div class="play-ring" style="background:var(--yt-red);">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-title">${v.title}</div>
+        <div style="font-size: 11px; color: var(--yt-red); margin-top: 5px; font-weight: 800;">${v.channel}</div>
+      </div>
     </div>`).join('');
 }
+
 function playYT(videoId) {
   showPage('player');
-  const localVid = document.getElementById('playerVideo'); localVid.style.display = 'none'; localVid.pause();
-  const ytIframe = document.getElementById('ytIframe'); ytIframe.style.display = 'block';
+  
+  const localVid = document.getElementById('playerVideo');
+  localVid.style.display = 'none';
+  localVid.pause();
+  
+  const ytIframe = document.getElementById('ytIframe');
+  ytIframe.style.display = 'block';
   ytIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-  document.getElementById('vTitle').textContent = "YouTube Explore Mode"; document.getElementById('vUploader').textContent = "YouTube Engine";
+  
+  document.getElementById('vTitle').textContent = "YouTube Explore Mode";
+  document.getElementById('vUploader').textContent = "YouTube Engine";
   currentVideoId = videoId;
 }
 
 /* ══ YOUTUBE PUBLISHER ══ */
 function connectYouTube() { window.location.href = API + '/youtube/auth'; }
+
 function checkYTAuth() {
   const ytStatus = document.getElementById('ytStatusText');
-  if(localStorage.getItem('yt_connected') === 'true') { ytStatus.textContent = '🟢 Connected'; ytStatus.style.color = 'var(--green)'; } 
-  else { ytStatus.textContent = '🔴 Not Connected'; ytStatus.style.color = 'var(--red)'; }
+  if(localStorage.getItem('yt_connected') === 'true') {
+    ytStatus.textContent = '🟢 Connected';
+    ytStatus.style.color = 'var(--green)';
+  } else {
+    ytStatus.textContent = '🔴 Not Connected';
+    ytStatus.style.color = 'var(--red)';
+  }
 }
+
 function populateYTVideoSelect() { 
   const s = document.getElementById('ytVideoSelect');
   s.innerHTML = allVideos.map(v => `<option value="${v.hls_url}" data-title="${v.title}" data-desc="${v.description||''}">${v.title}</option>`).join('');
 }
+
 function autoFillYTFields() {
   const select = document.getElementById('ytVideoSelect');
   if(select.options.length > 0) {
     const opt = select.options[select.selectedIndex];
-    document.getElementById('ytTitle').value = opt.dataset.title || ''; document.getElementById('ytDesc').value  = opt.dataset.desc  || '';
+    document.getElementById('ytTitle').value = opt.dataset.title || '';
+    document.getElementById('ytDesc').value  = opt.dataset.desc  || '';
   }
 }
-async function publishToYouTube() {
-  const videoUrl = document.getElementById('ytVideoSelect').value; const title = document.getElementById('ytTitle').value.trim();
-  const desc = document.getElementById('ytDesc').value.trim(); const tags = document.getElementById('ytTags').value.trim(); const ytPrivacy = document.getElementById('ytPrivacy').value;
-  if (!videoUrl) return showToast('⚠️ Select a video'); if (!title) return showToast('⚠️ Enter a title');
 
-  const btn = document.getElementById('ytPublishBtn'); btn.textContent = '⏳ Uploading to YouTube...'; btn.disabled = true;
+async function publishToYouTube() {
+  const videoUrl = document.getElementById('ytVideoSelect').value;
+  const title    = document.getElementById('ytTitle').value.trim();
+  const desc     = document.getElementById('ytDesc').value.trim();
+  const tags     = document.getElementById('ytTags').value.trim();
+  const ytPrivacy = document.getElementById('ytPrivacy').value;
+
+  if (!videoUrl) return showToast('⚠️ Select a video');
+  if (!title)    return showToast('⚠️ Enter a title');
+
+  const btn = document.getElementById('ytPublishBtn');
+  btn.textContent = '⏳ Uploading to YouTube...';
+  btn.disabled = true;
 
   try {
-    const r = await fetch(API + '/youtube/upload', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' }, body: JSON.stringify({ videoUrl, title, description: desc, tags, privacy: ytPrivacy }) });
+    const r = await fetch(API + '/youtube/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+      body: JSON.stringify({ videoUrl, title, description: desc, tags, privacy: ytPrivacy })
+    });
     const d = await r.json();
     if (r.ok && d.success) {
       showToast('▶ Live on YouTube Shorts!');
-      const card = document.getElementById('ytResultCard'); const link = document.getElementById('ytResultLink');
-      link.href = d.url; link.textContent = d.url; card.classList.add('show');
-    } else showToast('❌ ' + (d.error || 'Upload failed'));
-  } catch(e) { showToast('❌ Connection error'); } finally { btn.textContent = '▶ PUBLISH TO SHORTS'; btn.disabled = false; }
+      const card = document.getElementById('ytResultCard');
+      const link = document.getElementById('ytResultLink');
+      link.href = d.url;
+      link.textContent = d.url;
+      card.classList.add('show');
+    } else {
+      showToast('❌ ' + (d.error || 'Upload failed'));
+    }
+  } catch(e) {
+    showToast('❌ Connection error');
+  } finally {
+    btn.textContent = '▶ PUBLISH TO SHORTS';
+    btn.disabled = false;
+  }
 }
 
 /* ═══════════════════════════════════════════════
-   WEBRTC PEER-TO-PEER ENGINE (THE FIX!)
+   WEBRTC PEER-TO-PEER ENGINE
 ═══════════════════════════════════════════════ */
 const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 let peerConnection;
@@ -1160,19 +1257,16 @@ let localStream;
 async function initWebRTC() {
     peerConnection = new RTCPeerConnection(iceServers);
     
-    // Add our camera to the connection
     if (localStream) {
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
     }
 
-    // When the other person's camera arrives, play it in the big box
     peerConnection.ontrack = (event) => {
         const remoteVid = document.getElementById('remoteVideo');
         remoteVid.srcObject = event.streams[0];
         remoteVid.play().catch(e => console.log("Remote play error", e));
     };
 
-    // Find the best internet route to the other person
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
             socket.emit('webrtc-ice-candidate', { room: currentRoom, candidate: event.candidate });
@@ -1180,7 +1274,6 @@ async function initWebRTC() {
     };
 }
 
-// When a guest joins, the host creates the offer
 socket.on('user-joined', async (userId) => {
     if (!localStream) return; 
     await initWebRTC();
@@ -1189,7 +1282,6 @@ socket.on('user-joined', async (userId) => {
     socket.emit('webrtc-offer', { room: currentRoom, offer: offer });
 });
 
-// The guest receives the offer and answers back
 socket.on('webrtc-offer', async (offer) => {
     await initWebRTC();
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
@@ -1199,11 +1291,15 @@ socket.on('webrtc-offer', async (offer) => {
 });
 
 socket.on('webrtc-answer', async (answer) => {
-    if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    if (peerConnection) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    }
 });
 
 socket.on('webrtc-ice-candidate', async (candidate) => {
-    if (peerConnection) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    if (peerConnection) {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    }
 });
 
 /* ══ COLLAB BOARD SYNC ══ */
@@ -1211,12 +1307,36 @@ const thoughtArea = document.getElementById('thoughtArea');
 const indicator = document.getElementById('syncIndicator');
 
 thoughtArea.addEventListener('input', () => { 
-  if (currentRoom) { socket.emit('sync-thoughts', { room: currentRoom, content: thoughtArea.value }); indicator.textContent = "SYNCING..."; }
+  if (currentRoom) {
+    socket.emit('sync-thoughts', { room: currentRoom, content: thoughtArea.value }); 
+    indicator.textContent = "SYNCING...";
+  }
 });
-socket.on('sync-thoughts', (data) => { thoughtArea.value = data.content; indicator.textContent = "REMOTE UPDATED"; setTimeout(() => { indicator.textContent = "STATIONARY"; }, 1200); });
+
+socket.on('sync-thoughts', (data) => { 
+  thoughtArea.value = data.content; 
+  indicator.textContent = "REMOTE UPDATED";
+  setTimeout(() => { indicator.textContent = "STATIONARY"; }, 1200);
+});
+
 socket.on('room-metrics', (data) => { document.getElementById('memberBadge').textContent = data.members; });
-socket.on('request-room-state', (data) => { if (currentRoom) { const vid = document.getElementById('playerVideo'); socket.emit('send-room-state', { to: data.requester, state: { time: vid.currentTime, thought: thoughtArea.value, playing: !vid.paused } }); } });
-socket.on('receive-room-state', (state) => { const vid = document.getElementById('playerVideo'); if(vid) vid.currentTime = state.time; thoughtArea.value = state.thought; if (state.playing && vid) vid.play(); });
+
+socket.on('request-room-state', (data) => {
+    if (currentRoom) {
+        const vid = document.getElementById('playerVideo');
+        socket.emit('send-room-state', {
+            to: data.requester,
+            state: { time: vid.currentTime, thought: thoughtArea.value, playing: !vid.paused }
+        });
+    }
+});
+
+socket.on('receive-room-state', (state) => {
+    const vid = document.getElementById('playerVideo');
+    if(vid) vid.currentTime = state.time;
+    thoughtArea.value = state.thought;
+    if (state.playing && vid) vid.play();
+});
 
 function exportThoughtsAsPDF() {
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
@@ -1234,18 +1354,16 @@ function copyShareLink() {
 async function startVaultLiveReview() {
   if (!currentRoom) currentRoom = Math.random().toString(36).substring(7);
   document.getElementById('webcamContainer').style.display = 'block';
-  copyShareLink();
   
-  // 1. Get Camera
   try { 
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
     const localVid = document.getElementById('localVideo');
     localVid.srcObject = localStream;
     localVid.play().catch(e=>console.log(e));
   } catch(e) { showToast("⚠️ Webcam access denied"); }
-  
-  // 2. Join room (this alerts other users we are ready to connect)
+
   socket.emit('join-room', currentRoom); 
+  copyShareLink();
 }
 
 function endCall() { 
@@ -1262,7 +1380,7 @@ function onFileChange(input) {
 
 const dz = document.getElementById('dropZone');
 dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'); });
 dz.addEventListener('drop', e => {
   e.preventDefault(); dz.classList.remove('dragover');
   const f = e.dataTransfer.files[0];
@@ -1277,7 +1395,8 @@ async function publishVideo() {
   
   const btn = document.getElementById('publishBtn'); btn.innerHTML = "⏳ UPLOADING...";
   const fd = new FormData(); 
-  fd.append('video', file); fd.append('title', title);
+  fd.append('video', file); 
+  fd.append('title', title);
   fd.append('description', document.getElementById('upDesc').value);
   fd.append('category', document.getElementById('upCat').value);
   fd.append('is_private', isPrivate);
@@ -1313,7 +1432,6 @@ window.addEventListener('DOMContentLoaded', async () => {
       currentRoom = r; 
       document.getElementById('webcamContainer').style.display='block'; 
       
-      // Guest asks for camera permission upon clicking the link
       try { 
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
         const localVid = document.getElementById('localVideo');
@@ -1321,13 +1439,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         localVid.play().catch(e=>console.log(e));
       } catch(e) { showToast("⚠️ Webcam access denied"); }
 
-      // Guest joins room, triggering the WebRTC connection
       socket.emit('join-room', r); 
       socket.emit('request-room-state', { room: currentRoom }); 
     } 
-  } else if (yt) { playYT(yt); }
+  } else if (yt) { 
+    playYT(yt); 
+  }
 });
-
 </script>
 </body>
 </html>
