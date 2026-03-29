@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#080808">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>BeastVault</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -123,6 +120,11 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .ctrl-time{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-left:4px;}
 .vol-slider{width:72px;accent-color:var(--p);cursor:pointer;height:4px;border-radius:2px;}
 .player-glow-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--cyan),var(--orange));}
+
+/* WEBRTC FLOATING CAMS */
+.webcam-container{display:none; position:absolute; top:20px; right:20px; z-index:50; width:220px; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.2); background:#000;}
+.remote-video{width:100%; display:block; background:#111; transform:scaleX(-1);} /* Mirror remote for natural look */
+.local-video{width:35%; position:absolute; bottom:8px; right:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.3); background:#000; transform:scaleX(-1); box-shadow: 0 4px 12px rgba(0,0,0,0.5);}
 
 .player-info-card{width:100%;max-width:1200px;margin-top:20px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;}
 .player-top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
@@ -246,9 +248,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 .modal-err{font-size:13px;color:#f87171;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:var(--r-sm);padding:8px 12px;display:none;}
 .modal-err.show{display:block;}
 
-/* YT HUB */
-.vcard.yt-card-grid{cursor:pointer;}
-
 /* MOBILE NAV */
 .mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--mob-nav);background:rgba(8,8,8,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:900;padding:0 4px env(safe-area-inset-bottom,0);}
 .mob-nav-inner{display:flex;height:100%;align-items:center;justify-content:space-around;}
@@ -262,9 +261,6 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
 .toast{position:fixed;bottom:calc(var(--mob-nav) + 12px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-md);padding:11px 18px;font-size:14px;font-weight:600;color:var(--t1);box-shadow:0 8px 28px rgba(0,0,0,0.4);z-index:9999;opacity:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* YT MODAL */
-#ytModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;align-items:center;justify-content:center;padding:16px;}
 
 /* RESPONSIVE */
 @media(max-width:768px){
@@ -303,6 +299,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   .cat-pill{font-size:12px;padding:7px 14px;}
   .section-title{font-size:15px;}
   .modal-box{padding:24px 20px;}
+  .webcam-container{width:150px; top:10px; right:10px;}
 }
 @media(max-width:480px){.vcard-thumb{width:110px;}}
 @media(min-width:769px){.mob-nav{display:none;}}
@@ -407,6 +404,12 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   <div id="page-player" class="page">
     <div class="player-wrap">
       <div class="player-shell" id="videoContainer">
+        
+        <div id="webcamContainer" class="webcam-container">
+          <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+          <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+        </div>
+
         <video id="playerVideo" playsinline onclick="togglePlay()"></video>
         <div class="custom-controls" id="customControls">
           <div class="progress-area" id="progressArea" onclick="seekVideo(event)">
@@ -441,7 +444,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
         <div class="player-top-row">
           <h1 class="player-title" id="vTitle">Video Title</h1>
           <div style="display:flex; gap:10px; align-items:center;">
-            <button id="liveReviewBtn" onclick="startLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Sync</button>
+            <button id="liveReviewBtn" onclick="startLiveReview()" style="padding:9px 14px; background:linear-gradient(135deg, var(--p), var(--cyan)); border:none; border-radius:var(--r-sm); color:#fff; font-size:12px; font-weight:800; cursor:pointer; min-height:var(--touch-min);">👥 Live Call & Sync</button>
             <button class="btn-purge" id="purgeBtn">✕ Purge</button>
           </div>
         </div>
@@ -789,6 +792,15 @@ function showPage(id) {
     const v = document.getElementById('playerVideo');
     if (v) { v.pause(); v.src = ''; }
     if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
+    
+    // Stop Webcams if leaving player
+    if(localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+        document.getElementById('webcamContainer').style.display = 'none';
+        if(peerConnection) peerConnection.close();
+        document.getElementById('liveReviewBtn').innerHTML = '👥 Live Call & Sync';
+    }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -937,9 +949,7 @@ async function postComment() {
   } catch(e) { showToast('❌ Network error'); }
 }
 
-function escapeHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function timeAgo(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr), now = new Date();
@@ -972,10 +982,8 @@ async function publishVideo() {
     const r = await fetch(API + '/videos/upload', { method: 'POST', body: fd, headers: { 'Bypass-Tunnel-Reminder': 'true' } });
     if (r.ok) {
       showToast('🦁 Unleashed!');
-      document.getElementById('fileInput').value = '';
-      document.getElementById('dropFile').style.display = 'none';
-      document.getElementById('upTitle').value = '';
-      document.getElementById('upDesc').value = '';
+      document.getElementById('fileInput').value = ''; document.getElementById('dropFile').style.display = 'none';
+      document.getElementById('upTitle').value = ''; document.getElementById('upDesc').value = '';
       showPage('home');
     } else { const err = await r.json().catch(()=>({})); showToast('❌ ' + (err.error || 'Upload failed')); }
   } catch(e) { showToast('❌ Network error'); }
@@ -1094,21 +1102,12 @@ function playYT(id) {
 function closeYTPlayer() { document.getElementById('ytModal').style.display = 'none'; document.getElementById('ytFrame').src = ''; }
 
 /* ══ YOUTUBE SHORTS PUBLISH ══ */
-function setPrivacy(val, el) {
-  ytPrivacy = val;
-  document.querySelectorAll('.privacy-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
+function setPrivacy(val, el) { ytPrivacy = val; document.querySelectorAll('.privacy-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
 
 function connectYouTube() {
   const popup = window.open(API + '/youtube/auth', 'youtube-auth', 'width=500,height=650,scrollbars=yes');
   window.addEventListener('message', function handler(e) {
-    if (e.data === 'youtube-connected') {
-      window.removeEventListener('message', handler);
-      popup && popup.close();
-      checkYouTubeStatus();
-      showToast('YouTube connected!');
-    }
+    if (e.data === 'youtube-connected') { window.removeEventListener('message', handler); popup && popup.close(); checkYouTubeStatus(); showToast('YouTube connected!'); }
   });
 }
 
@@ -1116,10 +1115,8 @@ async function checkYouTubeStatus() {
   try {
     const r = await fetch(API + '/youtube/status', { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
     const d = await r.json();
-    const badge = document.getElementById('ytStatusBadge');
-    const text = document.getElementById('ytStatusText');
-    const btn = document.getElementById('ytConnectBtn');
-    const sub = document.getElementById('ytConnectSub');
+    const badge = document.getElementById('ytStatusBadge'); const text = document.getElementById('ytStatusText');
+    const btn = document.getElementById('ytConnectBtn'); const sub = document.getElementById('ytConnectSub');
     if (d.connected) {
       badge.className = 'yt-status-badge connected'; text.textContent = 'Connected';
       btn.textContent = 'Disconnect'; btn.className = 'btn-yt-connect disconnect'; btn.onclick = disconnectYouTube;
@@ -1169,8 +1166,7 @@ async function publishToYouTube() {
     const d = await r.json();
     if (r.ok && d.success) {
       showToast('▶ Live on YouTube Shorts!');
-      const card = document.getElementById('ytResultCard');
-      const link = document.getElementById('ytResultLink');
+      const card = document.getElementById('ytResultCard'); const link = document.getElementById('ytResultLink');
       link.href = d.url; link.textContent = d.url; card.classList.add('show');
     } else { showToast('❌ ' + (d.error || 'Upload failed')); }
   } catch(e) { showToast('❌ Network error'); }
@@ -1178,77 +1174,123 @@ async function publishToYouTube() {
 }
 
 /* ═══════════════════════════════════════════════
-   REAL-TIME SYNC ENGINE (Figma for Video)
+   REAL-TIME SYNC & WEBRTC ENGINE (Figma for Video)
 ═══════════════════════════════════════════════ */
-const socket = io(API.replace('/api', '')); // Connect to Render WebSocket
+const socket = io(API.replace('/api', '')); 
 let currentRoom = null;
-let isRemoteAction = false; // Prevents infinite loops!
+let isRemoteAction = false; 
 
-// 1. Generate Link & Join Room
-function startLiveReview() {
+// WEBRTC VARIABLES
+let peerConnection;
+let localStream;
+const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }; // Free Google Server
+
+// 1. Get Camera/Mic Access
+async function startWebcams() {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('localVideo').srcObject = localStream;
+    document.getElementById('webcamContainer').style.display = 'block';
+  } catch(e) {
+    showToast('⚠️ Camera/Mic access denied');
+    console.error(e);
+  }
+}
+
+// 2. Setup the Peer Connection
+function createPeerConnection() {
+  peerConnection = new RTCPeerConnection(rtcConfig);
+  
+  if (localStream) {
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  }
+
+  // When remote client sends video, put it in the big box
+  peerConnection.ontrack = (event) => {
+    document.getElementById('remoteVideo').srcObject = event.streams[0];
+  };
+
+  // Find network paths
+  peerConnection.onicecandidate = (event) => {
+    if (event.candidate && currentRoom) {
+      socket.emit('webrtc-ice-candidate', { room: currentRoom, candidate: event.candidate });
+    }
+  };
+}
+
+// 3. Generate Link & Join Room (HOST)
+async function startLiveReview() {
   if (!currentVideoId) return;
-  currentRoom = Math.random().toString(36).substring(2, 9); // Generate random room code
+  currentRoom = Math.random().toString(36).substring(2, 9); 
   const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}&room=${currentRoom}`;
   
   navigator.clipboard.writeText(link);
-  showToast('🔗 Invite Link Copied! Send it to your client.');
+  showToast('🔗 Invite Link Copied! Send to client.');
   
+  await startWebcams(); // Start host camera
   socket.emit('join-room', currentRoom);
+  
   const btn = document.getElementById('liveReviewBtn');
   if(btn) btn.innerHTML = '🟢 Room Active';
 }
 
-// 2. Listen for Client Joining
-socket.on('user-joined', () => {
-  showToast('👀 Client has joined the room!');
+// 4. Handle Client Joining & Init Call
+socket.on('user-joined', async () => {
+  showToast('👀 Client joined. Starting video call...');
+  if (!localStream) await startWebcams();
+  createPeerConnection();
+  
+  // Host creates the connection offer
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+  socket.emit('webrtc-offer', { room: currentRoom, offer: offer });
 });
 
-// 3. Broadcast OUR actions to the Client
-vid.addEventListener('play', () => {
-  if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', time: vid.currentTime });
-});
-vid.addEventListener('pause', () => {
-  if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', time: vid.currentTime });
-});
-vid.addEventListener('seeked', () => {
-  if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', time: vid.currentTime });
+// 5. Client Receives Offer
+socket.on('webrtc-offer', async (offer) => {
+  if (!localStream) await startWebcams();
+  if (!peerConnection) createPeerConnection();
+  
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+  const answer = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(answer);
+  socket.emit('webrtc-answer', { room: currentRoom, answer: answer });
 });
 
-// 4. React to CLIENT'S actions
+// 6. Host Receives Answer
+socket.on('webrtc-answer', async (answer) => {
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+});
+
+// 7. Exchange Network Paths
+socket.on('webrtc-ice-candidate', async (candidate) => {
+  try { await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } 
+  catch(e) { console.error('ICE error', e); }
+});
+
+// 8. Player Sync Logic
+vid.addEventListener('play', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', time: vid.currentTime }); });
+vid.addEventListener('pause', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', time: vid.currentTime }); });
+vid.addEventListener('seeked', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', time: vid.currentTime }); });
+
 socket.on('video-action', (data) => {
-  isRemoteAction = true; // Tell our player "Don't broadcast this, the client did it!"
-  
-  if (data.action === 'play') {
-    vid.currentTime = data.time;
-    vid.play();
-    playIcon.setAttribute('d', SVG_PAUSE);
-    showToast('▶ Client hit Play');
-  } else if (data.action === 'pause') {
-    vid.currentTime = data.time;
-    vid.pause();
-    playIcon.setAttribute('d', SVG_PLAY);
-    showToast('⏸ Client hit Pause');
-  } else if (data.action === 'seek') {
-    vid.currentTime = data.time;
-  }
-  
-  // Reset safety flag
+  isRemoteAction = true; 
+  if (data.action === 'play') { vid.currentTime = data.time; vid.play(); playIcon.setAttribute('d', SVG_PAUSE); showToast('▶ Remote Play'); }
+  else if (data.action === 'pause') { vid.currentTime = data.time; vid.pause(); playIcon.setAttribute('d', SVG_PLAY); showToast('⏸ Remote Pause'); }
+  else if (data.action === 'seek') { vid.currentTime = data.time; }
   setTimeout(() => { isRemoteAction = false; }, 150);
 });
-
 
 /* ══ BOOT ══ */
 const savedUser = localStorage.getItem('bv-user');
 if (savedUser) { try { currentUser = JSON.parse(savedUser); updateAuthUI(); } catch(e) {} }
 
-// Auto-join shared room logic
 const urlParams = new URLSearchParams(window.location.search);
 const sharedRoom = urlParams.get('room');
 const sharedVideo = urlParams.get('video');
 
 async function boot() {
-  await fetchVideos(); // Ensure videos are loaded first
-
+  await fetchVideos(); 
   if (sharedRoom && sharedVideo) {
     currentRoom = sharedRoom;
     socket.emit('join-room', currentRoom);
@@ -1256,10 +1298,12 @@ async function boot() {
     const btn = document.getElementById('liveReviewBtn');
     if(btn) btn.innerHTML = '🟢 Room Active';
     showToast('Joined Live Review Room!');
-    window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname); 
+    
+    // Auto-start webcam for the person joining the link
+    startWebcams();
   }
 }
-
 boot();
 </script>
 </body>

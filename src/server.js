@@ -6,8 +6,8 @@ const helmet     = require('helmet');
 const morgan     = require('morgan');
 const compression = require('compression');
 const rateLimit  = require('express-rate-limit');
-const http       = require('http'); // Required for Socket.IO
-const { Server } = require('socket.io'); // The Real-Time Engine
+const http       = require('http'); 
+const { Server } = require('socket.io'); 
 
 const authRoutes    = require('./routes/auth');
 const videoRoutes   = require('./routes/videos');
@@ -15,7 +15,7 @@ const userRoutes    = require('./routes/users');
 const youtubeRoutes = require('./routes/youtube');
 
 const app  = express();
-const server = http.createServer(app); // Wrap Express inside Node's HTTP server
+const server = http.createServer(app); 
 
 // ── 1. GLOBAL CORS ──────────────────────────────────────────────────
 app.use(cors({
@@ -51,30 +51,35 @@ app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
 });
 
-// ── 6. REAL-TIME ENGINE (SOCKET.IO) ──────────────────────────────────
+// ── 6. REAL-TIME ENGINE (SOCKET.IO + WEBRTC SIGNALING) ───────────────
 const io = new Server(server, {
-  cors: {
-    origin: "*", // Allow your GitHub Pages frontend to connect
-    methods: ["GET", "POST"]
-  }
+  cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
 io.on('connection', (socket) => {
-  console.log('⚡ A user connected to the real-time matrix:', socket.id);
+  console.log('⚡ User connected:', socket.id);
 
-  // When a user clicks "Start Review", they join a specific video room
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
-    console.log(`👤 User ${socket.id} joined review room: ${roomId}`);
-    
-    // Tell everyone else in the room that someone arrived
     socket.to(roomId).emit('user-joined', socket.id);
   });
-  // NEW: Relay play/pause/seek commands to the other person in the room
+
+  // Relay Video Player Sync Commands
   socket.on('video-action', (data) => {
-    // Sends the command to everyone in the room EXCEPT the person who clicked it
     socket.to(data.room).emit('video-action', data);
   });
+
+  // Relay WebRTC Live Video Calling Signals
+  socket.on('webrtc-offer', (data) => {
+    socket.to(data.room).emit('webrtc-offer', data.offer);
+  });
+  socket.on('webrtc-answer', (data) => {
+    socket.to(data.room).emit('webrtc-answer', data.answer);
+  });
+  socket.on('webrtc-ice-candidate', (data) => {
+    socket.to(data.room).emit('webrtc-ice-candidate', data.candidate);
+  });
+
   socket.on('disconnect', () => {
     console.log('❌ User disconnected:', socket.id);
   });
@@ -82,7 +87,6 @@ io.on('connection', (socket) => {
 
 // ── 7. START SERVER ──────────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || '4000');
-// Notice we use server.listen now, NOT app.listen!
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🦁 BeastVault Unleashed with WebSockets on Port ${PORT}`);
 });
