@@ -289,8 +289,10 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   .vcard-body{padding:10px 12px;flex:1;min-width:0;}
   .vcard-title{font-size:13px;}
   .vcard-play{display:none;}
+  
+  /* YOUTUBE MOBILE PLAYER OPTIMIZATION */
   .player-wrap{padding:0;}
-  .player-shell{border-radius:0;border-left:none;border-right:none;box-shadow:none;}
+  .player-shell{border-radius:0;border-left:none;border-right:none;box-shadow:none; width:100vw; max-width:100vw;}
   .custom-controls{padding:28px 10px 10px;}
   .ctrl-btn{width:42px;height:42px;}
   .controls-left,.controls-right{gap:6px;}
@@ -329,6 +331,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   <div class="webcam-controls">
     <button id="btnMuteMic" class="cam-btn" onclick="toggleMic()" title="Mute/Unmute Mic">🎤</button>
     <button id="btnMuteCam" class="cam-btn" onclick="toggleCam()" title="Turn off/on Camera">📷</button>
+    <button id="btnRemote" class="cam-btn" onclick="takeRemote()" title="Take Remote Control" style="display:none; margin-left:10px;">🎮</button>
   </div>
 </div>
 
@@ -427,6 +430,8 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
   <div id="page-player" class="page">
     <div class="player-wrap">
       <div class="player-shell" id="videoContainer">
+        <div class="sync-overlay" style="display:none; position:absolute; inset:0; z-index:20; background:transparent;"></div>
+        
         <video id="playerVideo" playsinline onclick="togglePlay()"></video>
         <div class="custom-controls" id="customControls">
           <div class="progress-area" id="progressArea" onclick="seekVideo(event)">
@@ -503,7 +508,8 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;border-radius:
 
   <div id="page-yt-player" class="page">
     <div class="player-wrap">
-      <div class="player-shell" style="background:#000;">
+      <div class="player-shell" style="background:#000; position:relative;">
+        <div class="sync-overlay" style="display:none; position:absolute; inset:0; z-index:20; background:transparent;"></div>
         <div id="ytFrame"></div>
       </div>
 
@@ -1132,7 +1138,8 @@ function playYT(id, title) {
   if (!ytPlayer) {
     ytPlayer = new YT.Player('ytFrame', {
       videoId: id,
-      playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1 },
+      /* Added playsinline: 1 to prevent native full-screen takeover on Android/iOS */
+      playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1 },
       events: { 'onStateChange': onYTStateChange }
     });
   } else {
@@ -1223,6 +1230,7 @@ async function publishToYouTube() {
 const socket = io(API.replace('/api', '')); 
 let currentRoom = null;
 let isRemoteAction = false; 
+let hasRemote = true; // NEW: The Remote Control Access system
 
 // WEBRTC VARIABLES
 let peerConnection;
@@ -1282,12 +1290,49 @@ function endCall() {
     peerConnection = null;
   }
   currentRoom = null;
+  
+  // Clean up overlays
+  document.querySelectorAll('.sync-overlay').forEach(o => o.style.display = 'none');
+  document.getElementById('btnRemote').style.display = 'none';
+  
   showToast('Call ended 📞');
   
   const lb = document.getElementById('liveReviewBtn');
   if (lb) lb.innerHTML = '👥 Live Call & Sync';
   const ytb = document.getElementById('ytLiveBtn');
   if (ytb) ytb.innerHTML = '👥 Live Call & Sync';
+}
+
+// Remote Control UI System
+function updateRemoteUI() {
+  const btn = document.getElementById('btnRemote');
+  if (!btn) return;
+  btn.style.display = 'flex'; // Ensure button is visible when room is active
+  
+  const overlays = document.querySelectorAll('.sync-overlay');
+  
+  if (hasRemote) {
+    btn.innerHTML = '🎮';
+    btn.title = 'You have the Remote';
+    btn.style.background = 'rgba(16,185,129,0.8)'; // Green
+    overlays.forEach(o => o.style.display = 'none'); // Remove click blockers
+  } else {
+    btn.innerHTML = '📺';
+    btn.title = 'Take Remote';
+    btn.style.background = 'rgba(0,0,0,0.6)'; // Dark viewer style
+    overlays.forEach(o => o.style.display = 'block'); // Enable click blockers
+  }
+}
+
+function takeRemote() {
+  if (hasRemote) return; // Already have it
+  hasRemote = true;
+  updateRemoteUI();
+  showToast('🎮 You took the remote!');
+  if (currentRoom) {
+    // Send generic video-action packet pretending to be a remote-takeover
+    socket.emit('video-action', { room: currentRoom, action: 'take-remote' });
+  }
 }
 
 // 2. Setup the Peer Connection
@@ -1316,6 +1361,8 @@ function createPeerConnection() {
 async function startVaultLiveReview() {
   if (!currentVideoId) return;
   currentRoom = Math.random().toString(36).substring(2, 9); 
+  hasRemote = true; // Host starts with the remote
+  updateRemoteUI();
   const link = `${window.location.origin}${window.location.pathname}?video=${currentVideoId}&room=${currentRoom}`;
   navigator.clipboard.writeText(link);
   showToast('🔗 Invite Link Copied! Send to client.');
@@ -1328,6 +1375,8 @@ async function startVaultLiveReview() {
 async function startYTLiveReview() {
   if (!currentYTVideoId) return;
   currentRoom = Math.random().toString(36).substring(2, 9); 
+  hasRemote = true; // Host starts with the remote
+  updateRemoteUI();
   const link = `${window.location.origin}${window.location.pathname}?ytvideo=${currentYTVideoId}&room=${currentRoom}`;
   navigator.clipboard.writeText(link);
   showToast('🔗 YouTube Invite Link Copied!');
@@ -1365,13 +1414,13 @@ socket.on('webrtc-ice-candidate', async (candidate) => {
   catch(e) { console.error('ICE error', e); }
 });
 
-// 8. Player Event Listeners
-vid.addEventListener('play', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', player: 'vault', time: vid.currentTime }); });
-vid.addEventListener('pause', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', player: 'vault', time: vid.currentTime }); });
-vid.addEventListener('seeked', () => { if (!isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', player: 'vault', time: vid.currentTime }); });
+// 8. Player Event Listeners (Only emit if we HAVE the remote!)
+vid.addEventListener('play', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'play', player: 'vault', time: vid.currentTime }); });
+vid.addEventListener('pause', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'pause', player: 'vault', time: vid.currentTime }); });
+vid.addEventListener('seeked', () => { if (hasRemote && !isRemoteAction && currentRoom) socket.emit('video-action', { room: currentRoom, action: 'seek', player: 'vault', time: vid.currentTime }); });
 
 function onYTStateChange(event) {
-  if (!isRemoteAction && currentRoom) {
+  if (hasRemote && !isRemoteAction && currentRoom) {
     if (event.data == YT.PlayerState.PLAYING) {
       socket.emit('video-action', { room: currentRoom, action: 'play', player: 'yt', time: ytPlayer.getCurrentTime() });
     } else if (event.data == YT.PlayerState.PAUSED) {
@@ -1380,10 +1429,19 @@ function onYTStateChange(event) {
   }
 }
 
-// 10. Handle Incoming Sync Commands (Fixed Echo Loop)
+// 10. Handle Incoming Sync Commands
 socket.on('video-action', (data) => {
+  
+  // Check if someone else just took the remote control
+  if (data.action === 'take-remote') {
+    hasRemote = false;
+    updateRemoteUI();
+    showToast('📺 Someone else took the remote');
+    return;
+  }
+
   isRemoteAction = true; 
-  clearTimeout(window.syncTimeout); // Reset debounce lock
+  clearTimeout(window.syncTimeout);
 
   if (data.player === 'yt' && ytPlayer) {
     if (data.action === 'play') { 
@@ -1396,7 +1454,6 @@ socket.on('video-action', (data) => {
       showToast('⏸ Remote Pause'); 
     }
   } else {
-    // Prevent micro-adjustments from creating infinite loop feedback
     if (data.action === 'seek' || data.action === 'play' || data.action === 'pause') {
       if (Math.abs(vid.currentTime - data.time) > 1.0) {
         vid.currentTime = data.time;
@@ -1414,28 +1471,60 @@ socket.on('video-action', (data) => {
     }
   }
   
-  // Lock local events from emitting for 800ms to allow DOM events to settle
   window.syncTimeout = setTimeout(() => { isRemoteAction = false; }, 800);
 });
 
-/* ══ MAKE WEBCAM DRAGGABLE ══ */
+/* ══ MAKE WEBCAM DRAGGABLE (TOUCH + MOUSE) ══ */
 const camBox = document.getElementById('webcamContainer');
 let isDragging = false, dragX, dragY;
 
-camBox.addEventListener('mousedown', (e) => {
-  if (e.offsetX > camBox.clientWidth - 20 && e.offsetY > camBox.clientHeight - 20) return;
+function startDrag(e) {
+  // Ignore clicks on buttons inside the webcam box
+  if (e.target.tagName === 'BUTTON' || e.target.closest('.cam-btn')) return;
+  
+  // Convert Touch/Mouse coordinates
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  
+  const rect = camBox.getBoundingClientRect();
+  const localX = clientX - rect.left;
+  const localY = clientY - rect.top;
+
+  // Let the bottom-right corner stay resizable
+  if (localX > rect.width - 20 && localY > rect.height - 20) return;
+  
   isDragging = true;
-  dragX = e.clientX - camBox.getBoundingClientRect().left;
-  dragY = e.clientY - camBox.getBoundingClientRect().top;
-});
-document.addEventListener('mousemove', (e) => {
-  if (isDragging) {
-    camBox.style.left = (e.clientX - dragX) + 'px';
-    camBox.style.top = (e.clientY - dragY) + 'px';
-    camBox.style.right = 'auto';
-  }
-});
-document.addEventListener('mouseup', () => { isDragging = false; });
+  dragX = localX;
+  dragY = localY;
+
+  // Prevent background scrolling while dragging on mobile
+  if (e.type === 'touchstart') document.body.style.overflow = 'hidden';
+}
+
+function moveDrag(e) {
+  if (!isDragging) return;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  
+  camBox.style.left = (clientX - dragX) + 'px';
+  camBox.style.top = (clientY - dragY) + 'px';
+  camBox.style.right = 'auto'; // allow free movement
+}
+
+function endDrag(e) { 
+  isDragging = false; 
+  document.body.style.overflow = ''; // Restore scrolling
+}
+
+// Desktop Mouse Drag
+camBox.addEventListener('mousedown', startDrag);
+document.addEventListener('mousemove', moveDrag);
+document.addEventListener('mouseup', endDrag);
+
+// Mobile Touch Drag
+camBox.addEventListener('touchstart', startDrag, {passive: false});
+document.addEventListener('touchmove', moveDrag, {passive: false});
+document.addEventListener('touchend', endDrag);
 
 /* ══ BOOT ══ */
 const savedUser = localStorage.getItem('bv-user');
@@ -1453,6 +1542,10 @@ async function boot() {
     currentRoom = sharedRoom;
     socket.emit('join-room', currentRoom);
     startWebcams();
+    
+    // If you are joining someone else's room, you start as Viewer
+    hasRemote = false; 
+    updateRemoteUI();
     
     if (sharedVideo) {
       openPlayer(sharedVideo);
